@@ -2,13 +2,15 @@ ReactRelayNetworkLayer
 ==========================
 
 The `ReactRelayNetworkLayer` is a [Relay Network Layer](https://facebook.github.io/relay/docs/guides-network-layer.html) 
-with query batching and middleware support:
+with query batching and middleware support.
+
+Available middlewares:
 - **auth** - for adding auth token, and refreshing it if gets 401 response from server.
 - **url** - for manipulating fetch `url` on fly via thunk
 - **logger** - for logging requests and responses
 - **perf** - simple time measure for network request
 
-The main purpose is allowing change requests on fly via middlewares.
+The main purpose is allowing patch requests on fly via middlewares.
 
 Installation
 ============
@@ -18,6 +20,7 @@ Installation
 
 Example of using middlewares
 ============================
+This code for **client side**.
 ```js
 import Relay from 'react-relay';
 import {
@@ -48,13 +51,13 @@ Relay.injectNetworkLayer(new RelayNetworkLayer([
 ```
 
 
-Batching several requests:
-==========================
+Batching several requests into one:
+===================================
 
 Sometimes Relay splitting query into multiple requests. This `ReactRelayNetworkLayer` can 
 combine it in one http request.
 
-Firstly, you should prepare server-side to proceed batch request:
+Firstly, you should prepare **server** to proceed batch request:
 
 ```js
 import express from 'express';
@@ -78,7 +81,7 @@ server.use('/graphql',
 );
 ```
 
-After that, you can enable batch queries on the client:
+After that, you may enable batch queries on the **client**:
 
 ```js
 Relay.injectNetworkLayer(new RelayNetworkLayer([
