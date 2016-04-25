@@ -18,7 +18,7 @@ Installation
 `npm install react-relay-network-layer`
 
 
-Example of using middlewares
+Usage of middlewares
 ============================
 This code for **client side**.
 ```js
@@ -54,10 +54,13 @@ Relay.injectNetworkLayer(new RelayNetworkLayer([
 Batching several requests into one:
 ===================================
 
-Sometimes Relay splitting query into multiple requests. This `ReactRelayNetworkLayer` can 
-combine it in one http request.
+Joseph Savona [wrote](https://github.com/facebook/relay/issues/1058#issuecomment-213592051): For legacy reasons, Relay splits "plural" root queries into individual queries. In general we want to diff each root value separately, since different fields may be missing for different root values.
 
-Firstly, you should prepare **server** to proceed batch request:
+Also if you use [react-relay-router](https://github.com/relay-tools/react-router-relay) and have multiple root queries in one route pass, you may notice that default network layer will produce several http requests. 
+
+So for avoiding multiple http-requests, the `ReactRelayNetworkLayer` is the right way to combine it in single http-request.
+
+Firstly, you should prepare **server** to proceed the batch request:
 
 ```js
 import express from 'express';
@@ -81,7 +84,7 @@ server.use('/graphql',
 );
 ```
 
-After that, you may enable batch queries on the **client**:
+And right after server side ready to accept batch queries, you may enable batching on the **client**:
 
 ```js
 Relay.injectNetworkLayer(new RelayNetworkLayer([
@@ -96,6 +99,7 @@ Relay.injectNetworkLayer(new RelayNetworkLayer([
 TODO
 ====
 - write fetchWithRetries middleware
+- improve performance of `graphqlBatchHTTPWrapper`, by removing JSON.parse (need find proper way how to get result from `express-graphql` in json, not stringified)    
 - find maintainers
- - who fix my ugly readme.MD 
+ - who made fixes and remove missunderstanding in readme.MD 
  - write tests
