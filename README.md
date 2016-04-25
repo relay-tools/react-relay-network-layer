@@ -6,7 +6,7 @@ with query batching and middleware support.
 
 Main purpose to use this NetworkLayer:
 - If your app is making enough individual queries to be a performance problem on first page load
-- If your app should manipulate request on the fly, and made some fallbacks if request fails
+- If your app should manipulate request on the fly - log them, change or made some fallbacks if request fails
 
 Available middlewares:
 - **auth** - for adding auth token, and refreshing it if gets 401 response from server.
@@ -21,9 +21,60 @@ Installation
 `npm install react-relay-network-layer`
 
 
-Usage of middlewares
-============================
-This code for **client side**.
+Part 1: Batching several requests into one
+==========================================
+
+Joseph Savona [wrote](https://github.com/facebook/relay/issues/1058#issuecomment-213592051): For legacy reasons, Relay splits "plural" root queries into individual queries. In general we want to diff each root value separately, since different fields may be missing for different root values.
+
+Also if you use [react-relay-router](https://github.com/relay-tools/react-router-relay) and have multiple root queries in one route pass, you may notice that default network layer will produce several http requests. 
+
+So for avoiding multiple http-requests, the `ReactRelayNetworkLayer` is the right way to combine it in single http-request.
+
+### Example how to enable batching 
+#### ...on server
+Firstly, you should prepare **server** to proceed the batch request:
+
+```js
+import express from 'express';
+import graphqlHTTP from 'express-graphql';
+import { graphqlBatchHTTPWrapper } from 'react-relay-network-layer';
+import bodyParser from 'body-parser';
+import myGraphqlSchema from './graphqlSchema';
+
+// setup standart `graphqlHTTP` express-middleware
+const graphQLMiddleware = graphqlHTTP({ schema: myGraphqlSchema });
+
+// declare route for batch query
+server.use('/graphql/batch',
+  bodyParser.json(),
+  graphqlBatchHTTPWrapper(graphQLMiddleware)
+);
+
+// declare standard graphql route
+server.use('/graphql',
+  graphQLMiddleware
+);
+```
+
+#### ...on client
+And right after server side ready to accept batch queries, you may enable batching on the **client**:
+
+```js
+Relay.injectNetworkLayer(new RelayNetworkLayer([
+  urlMiddleware({
+    url: '/graphql',
+    batchUrl: '/graphql/batch', // <--- route for batch queries 
+  }),
+], { disableBatchQuery: false })); // <--- set to FALSE, or may remove `disableBatchQuery` option at all
+```
+
+### How batching works internally
+Internally batching in NetworkLayer prepare list of queries `[ {id, query, variables}, ...]` sends it to server. And server returns list of responces `[ {id, payload}, ...]`, (where `id` is the same value as client requested for identifying which data goes with which query, and `payload` is standard response of GraphQL server: `{ data, error }`).
+
+
+Part 2: Middlewares
+====================
+### Example of injecting NetworkLayer on the **client side**.
 ```js
 import Relay from 'react-relay';
 import {
@@ -53,56 +104,8 @@ Relay.injectNetworkLayer(new RelayNetworkLayer([
 ], { disableBatchQuery: true }));
 ```
 
+### How middlewares work internally
 
-Batching several requests into one
-==================================
-
-Joseph Savona [wrote](https://github.com/facebook/relay/issues/1058#issuecomment-213592051): For legacy reasons, Relay splits "plural" root queries into individual queries. In general we want to diff each root value separately, since different fields may be missing for different root values.
-
-Also if you use [react-relay-router](https://github.com/relay-tools/react-router-relay) and have multiple root queries in one route pass, you may notice that default network layer will produce several http requests. 
-
-So for avoiding multiple http-requests, the `ReactRelayNetworkLayer` is the right way to combine it in single http-request.
-
-Firstly, you should prepare **server** to proceed the batch request:
-
-```js
-import express from 'express';
-import graphqlHTTP from 'express-graphql';
-import { graphqlBatchHTTPWrapper } from 'react-relay-network-layer';
-import bodyParser from 'body-parser';
-import myGraphqlSchema from './graphqlSchema';
-
-// setup standart `graphqlHTTP` express-middleware
-const graphQLMiddleware = graphqlHTTP({ schema: myGraphqlSchema });
-
-// declare route for batch query
-server.use('/graphql/batch',
-  bodyParser.json(),
-  graphqlBatchHTTPWrapper(graphQLMiddleware)
-);
-
-// declare standard graphql route
-server.use('/graphql',
-  graphQLMiddleware
-);
-```
-
-And right after server side ready to accept batch queries, you may enable batching on the **client**:
-
-```js
-Relay.injectNetworkLayer(new RelayNetworkLayer([
-  urlMiddleware({
-    url: '/graphql',
-    batchUrl: '/graphql/batch', // <--- route for batch queries 
-  }),
-], { disableBatchQuery: false })); // <--- set to FALSE, or may remove `disableBatchQuery` option at all
-```
-
-Internally batching in NetworkLayer prepare list of queries `[ {id, query, variables}, ...]` sends it to server. And server returns list of responces `[ {id, payload}, ...]`, (where `id` is the same value as client requested for identifying which data goes with which query, and `payload` is standard response of GraphQL server: `{ data, error }`).
-
-
-How middlewares work internally
-===============================
 Middlewares on bottom layer use [fetch](https://github.com/github/fetch) method. So `req` is compliant with a `fetch()` options. And `res` can be obtained via `resPromise.then(res => ...)`, which returned by `fetch()`.
 
 Middlewares have 3 phases: 
