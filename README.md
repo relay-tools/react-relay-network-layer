@@ -4,13 +4,16 @@ ReactRelayNetworkLayer
 The `ReactRelayNetworkLayer` is a [Relay Network Layer](https://facebook.github.io/relay/docs/guides-network-layer.html) 
 with query batching and middleware support.
 
+Main purpose to use this NetworkLayer:
+- If your app is making enough individual queries to be a performance problem on first page load
+- If your app should manipulate request on the fly, and made some fallbacks if request fails
+
 Available middlewares:
 - **auth** - for adding auth token, and refreshing it if gets 401 response from server.
 - **url** - for manipulating fetch `url` on fly via thunk
 - **logger** - for logging requests and responses
 - **perf** - simple time measure for network request
 
-The main purpose is allowing patch requests on fly via middlewares.
 
 Installation
 ============
@@ -94,6 +97,8 @@ Relay.injectNetworkLayer(new RelayNetworkLayer([
   }),
 ], { disableBatchQuery: false })); // <--- set to FALSE, or may remove `disableBatchQuery` option at all
 ```
+
+Internally batching in NetworkLayer prepare list of queries `[ {id, query, variables}, ...]` sends it to server. And server returns list of responces `[ {id, payload}, ...]`, (where `id` is the same value as client requested for identifying which data goes with which query, and `payload` is standard response of GraphQL server: `{ data, error }`).
 
 
 How middlewares work internally
