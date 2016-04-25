@@ -74,7 +74,7 @@ Internally batching in NetworkLayer prepare list of queries `[ {id, query, varia
 
 Part 2: Middlewares
 ====================
-### Example of injecting NetworkLayer on the **client side**.
+### Example of injecting NetworkLayer with middlewares on the **client side**.
 ```js
 import Relay from 'react-relay';
 import {
