@@ -1,5 +1,5 @@
 ReactRelayNetworkLayer
-==========================
+======================
 
 The `ReactRelayNetworkLayer` is a [Relay Network Layer](https://facebook.github.io/relay/docs/guides-network-layer.html) 
 with query batching and middleware support.
@@ -14,6 +14,7 @@ Available middlewares:
 - **logger** - for logging requests and responses
 - **perf** - simple time measure for network request
 
+[CHANGELOG](https://github.com/nodkz/react-relay-network-layer/blob/master/CHANGELOG.md)
 
 Installation
 ============
@@ -152,3 +153,14 @@ TODO
 - find maintainers
  - who made fixes and remove missunderstanding in readme.MD 
  - write tests
+
+
+Contribute
+==========
+I actively welcome pull requests with code and doc fixes. 
+Also if you made great middleware and want share it within this module, please feel free to open PR.
+
+
+License
+=======
+[MIT](https://github.com/nodkz/react-relay-network-layer/blob/master/LICENSE.md)
