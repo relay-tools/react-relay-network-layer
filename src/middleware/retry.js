@@ -12,7 +12,7 @@ export default function retryMiddleware(opts = {}) {
 
   return next => req => (
     next(req).then(res => {
-      if (res.status < 200 || res.status > 300 || !req.status.ok) {
+      if (res.status < 200 || res.status > 300 || !res.status.ok) {
         const request = Object.assign({}, req);
 
         if (fetchTimeout || retryDelays) {
