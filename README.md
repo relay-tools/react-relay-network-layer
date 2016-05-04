@@ -13,6 +13,17 @@ Available middlewares:
 - **url** - for manipulating fetch `url` on fly via thunk
 - **logger** - for logging requests and responses
 - **perf** - simple time measure for network request
+- **retry** - for request retry if the initial request fails
+
+  `options`:
+  * `fetchTimeout` : Number in milliseconds that defines in how much time will request timeout after it has been sent to the server.
+  * `retryDelays` : Array of millisecond that defines the values on which retries are based on.
+  * `statusCodes` : Array of XMLHttpRequest status codes which will fire up retryMiddleware.
+
+  If `options` are not provided retryMiddleware will use default options:
+    * `fetchTimeout`: 15000
+    * `retryDelays`: [1000, 3000]
+    * `statusCodes`:  status < 200 or status > 300
 
 [CHANGELOG](https://github.com/nodkz/react-relay-network-layer/blob/master/CHANGELOG.md)
 
@@ -79,7 +90,7 @@ Part 2: Middlewares
 ```js
 import Relay from 'react-relay';
 import {
-  RelayNetworkLayer, urlMiddleware, authMiddleware, loggerMiddleware, perfMiddleware,
+  RelayNetworkLayer, retryMiddleware, urlMiddleware, authMiddleware, loggerMiddleware, perfMiddleware,
 } from 'react-relay-network-layer';
 
 Relay.injectNetworkLayer(new RelayNetworkLayer([
@@ -102,6 +113,11 @@ Relay.injectNetworkLayer(new RelayNetworkLayer([
         .catch(err => console.log('[client.js] ERROR can not refresh token', err));
     },
   }),
+  retryMiddleware({
+    fetchTimeout: 15000,
+    retryDelays: [1000, 3000],
+    statusCodes: [404, 503, 504]
+  })
 ], { disableBatchQuery: true }));
 ```
 
@@ -148,9 +164,9 @@ Middlewares use LIFO (last in, first out) stack. Or simply put - use `compose` f
 
 TODO
 ====
-- write fetchWithRetries middleware
-- improve performance of `graphqlBatchHTTPWrapper`, by removing JSON.parse (need find proper way how to get result from `express-graphql` in json, not stringified)    
-- find maintainers
+- [x] write fetchWithRetries middleware
+- [ ] improve performance of `graphqlBatchHTTPWrapper`, by removing JSON.parse (need find proper way how to get result from `express-graphql` in json, not stringified)
+- [ ] find maintainers
  - who made fixes and remove missunderstanding in readme.MD 
  - write tests
 
