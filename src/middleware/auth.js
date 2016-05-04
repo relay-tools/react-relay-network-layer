@@ -32,7 +32,7 @@ export default function authMiddleware(opts = {}) {
       if (err.name === 'WrongTokenError') {
         return tokenRefreshPromise(req, err.res)
           .then(newToken => {
-            req.header['Authorization'] = `${prefix}${newToken}`;
+            req.headers['Authorization'] = `${prefix}${newToken}`;
             return next(req); // re-run query with new token
           });
       }

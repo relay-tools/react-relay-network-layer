@@ -15,7 +15,9 @@ Available middlewares:
 - **retry** - for request retry if the initial request fails. Options:
   * `fetchTimeout` - number in milliseconds that defines in how much time will request timeout after it has been sent to the server (default: `15000`).
   * `retryDelays` - array of millisecond that defines the values on which retries are based on (default: `[1000, 3000]`).
-  * `statusCodes` - array of XMLHttpRequest status codes which will fire up retryMiddleware (default: `status < 200 or status > 300`).  
+  * `statusCodes` - array of response status codes which will fire up retryMiddleware (default: `status < 200 or status > 300`).  
+  * `allowMutations` - by default retries disabled for mutations, you may allow process retries for them passing `true` (default: `false`)
+  * `forceRetry` - function(cb, delay), when request is delayed for next retry, middleware will call this function and pass to it a callback and delay time. When you call this callback, middleware will proceed request immediately (default: `false`). 
 - **auth** - for adding auth token, and refreshing it if gets 401 response from server. Options:
   * `token` - string or function(req) which returns token. If function is provided, then it will be called for every request (so you may change tokens on fly).
   * `tokenRefreshPromise`: - function(req, err) which must return promise with new token, called only if server returns 401 status code and this function is provided.
@@ -116,8 +118,9 @@ Relay.injectNetworkLayer(new RelayNetworkLayer([
   }),
   retryMiddleware({
     fetchTimeout: 15000,
-    retryDelays: [1000, 3000],
-    statusCodes: [404, 503, 504]
+    retryDelays: (attempt) => Math.pow(2, attempt + 4) * 100, // or simple array [3200, 6400, 12800, 25600, 51200, 102400, 204800, 409600],
+    forceRetry: (cb, delay) => { window.forceRelayRetry = cb; console.log('call `forceRelayRetry()` for immediately retry! Or wait ' + delay + ' ms.'); },
+    statusCodes: [500, 503, 504]
   })
 ], { disableBatchQuery: true }));
 ```

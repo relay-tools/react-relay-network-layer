@@ -1,5 +1,9 @@
 ## master
 
+## 1.0.3 (May 4, 2016)
+
+* feat: improved `retryMiddleware` with thunk retries delays and force fetch
+
 ## 1.0.2 (May 4, 2016)
 
 * feat: New `retryMiddleware` for request retry if the initial request fails (thanks to @mario-jerkovic)
