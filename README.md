@@ -9,25 +9,22 @@ Main purpose to use this NetworkLayer:
 - If your app should manipulate request on the fly - log them, change or made some fallbacks if request fails
 
 Available middlewares:
-- **auth** - for adding auth token, and refreshing it if gets 401 response from server.
-  `options`:
+- **url** - for manipulating fetch `url` on fly via thunk. Options:
+  * `url` - string or function(req) for single request (default: `/graphql`)
+  * `batchUrl` -  string or function(req) for batch request, server must be prepared for such requests (default: `/graphql/batch`)
+- **retry** - for request retry if the initial request fails. Options:
+  * `fetchTimeout` - number in milliseconds that defines in how much time will request timeout after it has been sent to the server (default: `15000`).
+  * `retryDelays` - array of millisecond that defines the values on which retries are based on (default: `[1000, 3000]`).
+  * `statusCodes` - array of XMLHttpRequest status codes which will fire up retryMiddleware (default: `status < 200 or status > 300`).  
+- **auth** - for adding auth token, and refreshing it if gets 401 response from server. Options:
   * `token` - string or function(req) which returns token. If function is provided, then it will be called for every request (so you may change tokens on fly).
   * `tokenRefreshPromise`: - function(req, err) which must return promise with new token, called only if server returns 401 status code and this function is provided.
   * `prefix` - prefix before token (default: `'Bearer '`)
-- **url** - for manipulating fetch `url` on fly via thunk
-  `options`:
-  * `url` - string or function(req) for single request (default: `/graphql`)
-  * `batchUrl` -  string or function(req) for batch request, server must be prepared for such requests (default: `/graphql/batch`)
-- **logger** - for logging requests and responses
-  `options`:
+- **logger** - for logging requests and responses. Options:
   * `logger` - log function (default: `console.log.bind(console, '[RELAY-NETWORK]')`)
-- **perf** - simple time measure for network request
+- **perf** - simple time measure for network request. Options:
   * `logger` - log function (default: `console.log.bind(console, '[RELAY-NETWORK]')`)
-- **retry** - for request retry if the initial request fails
-  `options`:
-  * `fetchTimeout` - number in milliseconds that defines in how much time will request timeout after it has been sent to the server (default: `15000`).
-  * `retryDelays` - array of millisecond that defines the values on which retries are based on (default: `[1000, 3000]`).
-  * `statusCodes` - array of XMLHttpRequest status codes which will fire up retryMiddleware (default: `status < 200 or status > 300`).
+
 
 [CHANGELOG](https://github.com/nodkz/react-relay-network-layer/blob/master/CHANGELOG.md)
 
