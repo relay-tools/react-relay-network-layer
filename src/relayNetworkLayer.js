@@ -13,7 +13,6 @@ export default class RelayNetworkLayer {
     this._supportedOptions = [];
 
     this._middlewares.forEach(mw => {
-      console.log(mw);
       if (mw && mw.supports) {
         if (Array.isArray(mw.supports)) {
           this._supportedOptions.push(...mw.supports);

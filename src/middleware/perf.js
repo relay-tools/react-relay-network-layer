@@ -11,7 +11,7 @@ export default function performanceMiddleware(opts = {}) {
 
     return next(req).then(res => {
       const end = new Date().getTime();
-      logger(`${end - start}ms for ${query}`);
+      logger(`${query}: ${end - start}ms`);
       return res;
     });
   };
