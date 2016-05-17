@@ -26,7 +26,9 @@ Available middlewares:
   * `logger` - log function (default: `console.log.bind(console, '[RELAY-NETWORK]')`)
 - **perf** - simple time measure for network request. Options:
   * `logger` - log function (default: `console.log.bind(console, '[RELAY-NETWORK]')`)
-
+- **gqErrors** - display `errors` data to console from graphql response. If you want see stackTrace for errors, you should tune `formatError` param in `graphqlHTTP` (see example below). Options:
+  * `logger` - log function (default: `console.error.bind(console)`)
+  * `prefix` - prefix message (dafault: `[RELAY-NETWORK] GRAPHQL SERVER ERROR:`)
 
 [CHANGELOG](https://github.com/nodkz/react-relay-network-layer/blob/master/CHANGELOG.md)
 
@@ -57,7 +59,13 @@ import bodyParser from 'body-parser';
 import myGraphqlSchema from './graphqlSchema';
 
 // setup standart `graphqlHTTP` express-middleware
-const graphQLMiddleware = graphqlHTTP({ schema: myGraphqlSchema });
+const graphQLMiddleware = graphqlHTTP({ 
+  schema: myGraphqlSchema,
+  formatError: (error) => ({ // better errors for development. `stack` used in `gqErrors` middleware
+    message: error.message,
+    stack: process.env.NODE_ENV === 'development' ? error.stack.split('\n') : null,
+  }),
+});
 
 // declare route for batch query
 server.use('/graphql/batch',
@@ -93,7 +101,8 @@ Part 2: Middlewares
 ```js
 import Relay from 'react-relay';
 import {
-  RelayNetworkLayer, retryMiddleware, urlMiddleware, authMiddleware, loggerMiddleware, perfMiddleware,
+  RelayNetworkLayer, retryMiddleware, urlMiddleware, authMiddleware, loggerMiddleware, 
+  perfMiddleware, gqErrorsMiddleware
 } from 'react-relay-network-layer';
 
 Relay.injectNetworkLayer(new RelayNetworkLayer([
@@ -101,6 +110,7 @@ Relay.injectNetworkLayer(new RelayNetworkLayer([
     url: (req) => '/graphql',
   }),
   loggerMiddleware(),
+  gqErrorsMiddleware(),
   perfMiddleware(),
   authMiddleware({
     token: () => store.get('jwt'),
