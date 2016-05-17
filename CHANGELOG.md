@@ -1,5 +1,7 @@
 ## master
 
+* experimental: deferMiddleware, right now it's only inform Relay that NetworkLayer support this feature
+
 ## 1.0.3 (May 4, 2016)
 
 * feat: improved `retryMiddleware` with thunk retries delays and force fetch

@@ -10,11 +10,22 @@ export default class RelayNetworkLayer {
   constructor(middlewares, options) {
     this._options = options;
     this._middlewares = Array.isArray(middlewares) ? middlewares : [middlewares];
+    this._supportedOptions = [];
+
+    this._middlewares.forEach(mw => {
+      console.log(mw);
+      if (mw && mw.supports) {
+        if (Array.isArray(mw.supports)) {
+          this._supportedOptions.push(...mw.supports);
+        } else {
+          this._supportedOptions.push(mw.supports);
+        }
+      }
+    });
   }
 
   supports = (...options) => {
-    // Does not support the only defined option, "defer".
-    return false;
+    return options.every(option => this._supportedOptions.indexOf(option) !== -1);
   };
 
   sendQueries = (requests) => {

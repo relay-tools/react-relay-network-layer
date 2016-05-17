@@ -4,6 +4,7 @@ import urlMiddleware from './middleware/url';
 import authMiddleware from './middleware/auth';
 import perfMiddleware from './middleware/perf';
 import loggerMiddleware from './middleware/logger';
+import deferMiddleware from './middleware/defer';
 import graphqlBatchHTTPWrapper from './express-middleware/graphqlBatchHTTPWrapper';
 
 export {
@@ -13,5 +14,7 @@ export {
   authMiddleware,
   perfMiddleware,
   loggerMiddleware,
+  deferMiddleware,
   graphqlBatchHTTPWrapper,
 };
+
