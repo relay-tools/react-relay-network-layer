@@ -178,7 +178,7 @@ Middlewares use LIFO (last in, first out) stack. Or simply put - use `compose` f
 
 TODO
 ====
-- [x] write fetchWithRetries middleware (thanks to @mario-jerkovic)
+- [ ] Support `defer`, see [relay/issues/288](https://github.com/facebook/relay/issues/288)
 - [ ] improve performance of `graphqlBatchHTTPWrapper`, by removing JSON.parse (need find proper way how to get result from `express-graphql` in json, not stringified)
 - [ ] find maintainers
  - who made fixes and remove missunderstanding in readme.MD 

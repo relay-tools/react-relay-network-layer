@@ -1,6 +1,9 @@
 ## master
 
-* experimental: deferMiddleware, right now it's only inform Relay that NetworkLayer support this feature
+* feat: Add `json` param to `response`. Now it's available for middleware in bubbling phase (res.json).
+* feat: new middleware `gqErrors` - display `errors` data to console from graphql response
+![gqErrorsMiddleware](https://cloud.githubusercontent.com/assets/1946920/15324650/28582d12-1c69-11e6-9ef3-6834dee031e6.png)
+* experimental: `deferMiddleware`, right now it's only inform Relay that NetworkLayer support this feature. See discussion about `defer` here [relay/issues/288](https://github.com/facebook/relay/issues/288)
 
 ## 1.0.3 (May 4, 2016)
 
