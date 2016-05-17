@@ -1,4 +1,4 @@
-/* eslint-disable no-use-before-define, no-else-return, prefer-const */
+/* eslint-disable no-use-before-define, no-else-return, prefer-const, no-param-reassign */
 
 import 'whatwg-fetch';
 
@@ -14,14 +14,25 @@ export default function fetchWrapper(reqFromRelay, middlewares) {
       }
     }
 
-    return fetch(url, opts).then();
+    return fetch(url, opts).then(res =>
+      new Promise((resolve, reject) => {
+        res.json()
+          .then(json => {
+            res.json = json;
+            resolve(res);
+          })
+          .catch(err => {
+            reject(err);
+          });
+      })
+    );
   };
 
   const wrappedFetch = compose(...middlewares)(fetchAfterAllWrappers);
 
   return wrappedFetch(reqFromRelay)
     .then(throwOnServerError)
-    .then(response => response.json());
+    .then(res => res.json);
 }
 
 
