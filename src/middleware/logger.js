@@ -1,6 +1,6 @@
 /* eslint-disable no-console */
 
-export default function perfMiddleware(opts = {}) {
+export default function loggerMiddleware(opts = {}) {
   const logger = opts.logger || console.log.bind(console, '[RELAY-NETWORK]');
 
   return next => req => {
