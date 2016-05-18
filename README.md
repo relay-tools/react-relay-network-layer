@@ -29,6 +29,7 @@ Available middlewares:
 - **gqErrors** - display `errors` data to console from graphql response. If you want see stackTrace for errors, you should tune `formatError` param in `graphqlHTTP` (see example below). Options:
   * `logger` - log function (default: `console.error.bind(console)`)
   * `prefix` - prefix message (dafault: `[RELAY-NETWORK] GRAPHQL SERVER ERROR:`)
+- **defer** - _experimental_ Right now `deferMiddleware()` just set `defer` as supported option for Relay. So this middleware allow to community play with `defer()` in cases, which was [described by @wincent](https://github.com/facebook/relay/issues/288#issuecomment-199510058).
 
 [CHANGELOG](https://github.com/nodkz/react-relay-network-layer/blob/master/CHANGELOG.md)
 
@@ -179,10 +180,12 @@ Middlewares use LIFO (last in, first out) stack. Or simply put - use `compose` f
 TODO
 ====
 - [ ] Support `defer`, see [relay/issues/288](https://github.com/facebook/relay/issues/288)
-- [ ] improve performance of `graphqlBatchHTTPWrapper`, by removing JSON.parse (need find proper way how to get result from `express-graphql` in json, not stringified)
-- [ ] find maintainers
- - who made fixes and remove missunderstanding in readme.MD 
- - write tests
+- [ ] Rewrite `batching` as middleware, keep in mind principles of how works [DataLoader](https://github.com/facebook/dataloader) via eventLoop (`process.nextTick()`)
+- [ ] Improve performance of `graphqlBatchHTTPWrapper`, by removing JSON.parse (need find proper way how to get result from `express-graphql` in json, not stringified)
+- [ ] Write server side middleware for `express-graphql`.
+- [ ] Find brave peoples
+ - who made fixes and remove misspelling and missunderstanding in readme.MD 
+ - may be write tests (I haven't enough experience in it)
 
 
 Contribute
