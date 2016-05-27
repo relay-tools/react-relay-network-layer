@@ -1,5 +1,8 @@
 ## master
 
+## 1.1.2 (May 27, 2016)
+* feat: improve performance of `graphqlBatchHTTPWrapper`, by removing JSON.parse
+
 ## 1.1.1 (May 27, 2016)
 * fix: add support for express-graphql@0.5.2
 

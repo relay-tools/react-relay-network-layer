@@ -18,6 +18,7 @@ export default function (graphqlHTTPMiddleware) {
 
             // support express-graphql@0.5.2
             setHeader() { return this; },
+            header() {},
             write(payload) { this.payload = payload; },
             end() {
               resolve({ status: this.statusCode, id: data.id, payload: this.payload });
@@ -29,15 +30,16 @@ export default function (graphqlHTTPMiddleware) {
       )
     ).then(
       (responses) => {
-        const response = [];
-        responses.forEach(({ status, id, payload }) => {
-          if (status) { res.status(status); }
-          response.push({
-            id,
-            payload: JSON.parse(payload),
-          });
+        let response = '';
+        responses.forEach(({ status, id, payload }, idx) => {
+          if (status) {
+            res.status(status);
+          }
+          const comma = responses.length - 1 > idx ? ',' : '';
+          response += `{ "id":"${id}", "payload":${payload} }${comma}`;
         });
-        res.send(response);
+        res.set('Content-Type', 'application/json');
+        res.send(`[${response}]`);
         next();
       }
     );

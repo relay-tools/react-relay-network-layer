@@ -181,7 +181,7 @@ TODO
 ====
 - [ ] Support `defer`, see [relay/issues/288](https://github.com/facebook/relay/issues/288)
 - [ ] Rewrite `batching` as middleware, keep in mind principles of how works [DataLoader](https://github.com/facebook/dataloader) via eventLoop (`process.nextTick()`)
-- [ ] Improve performance of `graphqlBatchHTTPWrapper`, by removing JSON.parse (need find proper way how to get result from `express-graphql` in json, not stringified)
+- [*] Improve performance of `graphqlBatchHTTPWrapper`, by removing JSON.parse (need find proper way how to get result from `express-graphql` in json, not stringified)
 - [ ] Write server side middleware for `express-graphql`.
 - [ ] Find brave peoples
  - who made fixes and remove misspelling and missunderstanding in readme.MD 
