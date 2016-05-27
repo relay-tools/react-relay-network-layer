@@ -1,5 +1,8 @@
 ## master
 
+## 1.1.1 (May 27, 2016)
+* fix: add support for express-graphql@0.5.2
+
 ## 1.1.0 (May 17, 2016)
 
 * feat: Add `json` param to `response`. Now it's available for middleware in bubbling phase (res.json).

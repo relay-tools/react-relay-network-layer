@@ -10,10 +10,17 @@ export default function (graphqlHTTPMiddleware) {
             body: data,
           };
           const subResponse = {
-            status(st) { this._status = st; return this; },
+            status(st) { this.statusCode = st; return this; },
             set() { return this; },
             send(payload) {
-              resolve({ status: this._status, id: data.id, payload });
+              resolve({ status: this.statusCode, id: data.id, payload });
+            },
+
+            // support express-graphql@0.5.2
+            setHeader() { return this; },
+            write(payload) { this.payload = payload; },
+            end() {
+              resolve({ status: this.statusCode, id: data.id, payload: this.payload });
             },
           };
           subResponses.push(subResponse);
