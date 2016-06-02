@@ -24,6 +24,7 @@ Available middlewares:
   * `prefix` - prefix before token (default: `'Bearer '`)
 - **logger** - for logging requests and responses. Options:
   * `logger` - log function (default: `console.log.bind(console, '[RELAY-NETWORK]')`)
+  * If you use `Relay@^0.9.0` you may turn on [great relay's internal logs](https://twitter.com/steveluscher/status/738101549591732225) for mutation operations. For this you should open browser console and type `__DEV__=true`. With webpack you may use `webpack.BannerPlugin('__DEV__=true;', {raw: true})` or `webpack.DefinePlugin({__DEV__: true})`.
 - **perf** - simple time measure for network request. Options:
   * `logger` - log function (default: `console.log.bind(console, '[RELAY-NETWORK]')`)
 - **gqErrors** - display `errors` data to console from graphql response. If you want see stackTrace for errors, you should tune `formatError` param in `graphqlHTTP` (see example below). Options:
