@@ -22,6 +22,7 @@ Available middlewares:
   * `token` - string or function(req) which returns token. If function is provided, then it will be called for every request (so you may change tokens on fly).
   * `tokenRefreshPromise`: - function(req, err) which must return promise with new token, called only if server returns 401 status code and this function is provided.
   * `prefix` - prefix before token (default: `'Bearer '`)
+  * If you use `auth` middleware with `retry`, `retry` must be used before `auth`. Eg. if token expired when retries apply, then `retry` can call `auth` middleware again.
 - **logger** - for logging requests and responses. Options:
   * `logger` - log function (default: `console.log.bind(console, '[RELAY-NETWORK]')`)
   * If you use `Relay@^0.9.0` you may turn on relay's internal [extended mutation debugger](https://twitter.com/steveluscher/status/738101549591732225). For this you should open browser console and type `__DEV__=true`. With webpack you may use `webpack.BannerPlugin('__DEV__=true;', {raw: true})` or `webpack.DefinePlugin({__DEV__: true})`.
@@ -115,6 +116,12 @@ Relay.injectNetworkLayer(new RelayNetworkLayer([
   loggerMiddleware(),
   gqErrorsMiddleware(),
   perfMiddleware(),
+  retryMiddleware({
+    fetchTimeout: 15000,
+    retryDelays: (attempt) => Math.pow(2, attempt + 4) * 100, // or simple array [3200, 6400, 12800, 25600, 51200, 102400, 204800, 409600],
+    forceRetry: (cb, delay) => { window.forceRelayRetry = cb; console.log('call `forceRelayRetry()` for immediately retry! Or wait ' + delay + ' ms.'); },
+    statusCodes: [500, 503, 504]
+  }),
   authMiddleware({
     token: () => store.get('jwt'),
     tokenRefreshPromise: (req) => {
@@ -128,12 +135,6 @@ Relay.injectNetworkLayer(new RelayNetworkLayer([
         })
         .catch(err => console.log('[client.js] ERROR can not refresh token', err));
     },
-  }),
-  retryMiddleware({
-    fetchTimeout: 15000,
-    retryDelays: (attempt) => Math.pow(2, attempt + 4) * 100, // or simple array [3200, 6400, 12800, 25600, 51200, 102400, 204800, 409600],
-    forceRetry: (cb, delay) => { window.forceRelayRetry = cb; console.log('call `forceRelayRetry()` for immediately retry! Or wait ' + delay + ' ms.'); },
-    statusCodes: [500, 503, 504]
   })
 ], { disableBatchQuery: true }));
 ```
