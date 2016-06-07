@@ -135,7 +135,13 @@ Relay.injectNetworkLayer(new RelayNetworkLayer([
         })
         .catch(err => console.log('[client.js] ERROR can not refresh token', err));
     },
-  })
+  }),
+  
+  // example of the custom inline middleware (add `X-Request-ID` to request headers)
+  next => req => {
+    req.headers['X-Request-ID'] = uuid.v4();
+    return next(req);
+  }
 ], { disableBatchQuery: true }));
 ```
 
