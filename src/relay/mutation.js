@@ -4,6 +4,7 @@ import formatRequestErrors from '../formatRequestErrors';
 
 export default function mutation(relayRequest, fetchWithMiddleware) {
   const req = {
+    method: 'POST',
     relayReqId: Date.now(),
     relayReqObj: relayRequest,
     relayReqType: 'mutation',
@@ -41,8 +42,7 @@ function _hasFiles(relayRequest) {
 
 function _mutationWithFiles(relayRequest) {
   const req = {
-    method: 'POST',
-    headers: {}
+    headers: {},
   };
 
   if (_hasFiles(relayRequest)) {
@@ -54,11 +54,9 @@ function _mutationWithFiles(relayRequest) {
     const formData = new FormData();
     formData.append('query', relayRequest.getQueryString());
     formData.append('variables', JSON.stringify(relayRequest.getVariables()));
-    for (const filename in files) {
-      if (files.hasOwnProperty(filename)) {
-        formData.append(filename, files[filename]);
-      }
-    }
+    Object.keys(files).forEach(filename => {
+      formData.append(filename, files[filename]);
+    });
     req.body = formData;
   }
 
@@ -68,7 +66,6 @@ function _mutationWithFiles(relayRequest) {
 
 function _mutation(relayRequest) {
   const req = {
-    method: 'POST',
     headers: {
       Accept: '*/*',
       'Content-Type': 'application/json',
