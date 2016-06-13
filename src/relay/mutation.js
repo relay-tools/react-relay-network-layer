@@ -42,6 +42,7 @@ function _hasFiles(relayRequest) {
 function _mutationWithFiles(relayRequest) {
   const req = {
     method: 'POST',
+    headers: {}
   };
 
   if (_hasFiles(relayRequest)) {
