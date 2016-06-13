@@ -1,5 +1,8 @@
 ## master
 
+## 1.1.3 (June 13, 2016)
+* fix: files upload with auth middleware (thanks to @alexanderlamb)
+
 ## 1.1.2 (May 27, 2016)
 * feat: improve performance of `graphqlBatchHTTPWrapper`, by removing JSON.parse
 
