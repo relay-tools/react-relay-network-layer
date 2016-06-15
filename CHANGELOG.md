@@ -1,5 +1,8 @@
 ## master
 
+## 1.1.4 (June 15, 2016)
+* feat: add `allowEmptyToken` option for `authMiddleware` to allow made a request without Authorization header if token is empty
+
 ## 1.1.3 (June 13, 2016)
 * fix: files upload with auth middleware (thanks to @alexanderlamb)
 

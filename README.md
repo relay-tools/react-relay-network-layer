@@ -1,7 +1,7 @@
 ReactRelayNetworkLayer
 ======================
 
-The `ReactRelayNetworkLayer` is a [Relay Network Layer](https://facebook.github.io/relay/docs/guides-network-layer.html) 
+The `ReactRelayNetworkLayer` is a [Relay Network Layer](https://facebook.github.io/relay/docs/guides-network-layer.html)
 with query batching and middleware support.
 
 Main purpose to use this NetworkLayer:
@@ -17,10 +17,11 @@ Available middlewares:
   * `retryDelays` - array of millisecond that defines the values on which retries are based on (default: `[1000, 3000]`).
   * `statusCodes` - array of response status codes which will fire up retryMiddleware (default: `status < 200 or status > 300`).  
   * `allowMutations` - by default retries disabled for mutations, you may allow process retries for them passing `true` (default: `false`)
-  * `forceRetry` - function(cb, delay), when request is delayed for next retry, middleware will call this function and pass to it a callback and delay time. When you call this callback, middleware will proceed request immediately (default: `false`). 
+  * `forceRetry` - function(cb, delay), when request is delayed for next retry, middleware will call this function and pass to it a callback and delay time. When you call this callback, middleware will proceed request immediately (default: `false`).
 - **auth** - for adding auth token, and refreshing it if gets 401 response from server. Options:
   * `token` - string or function(req) which returns token. If function is provided, then it will be called for every request (so you may change tokens on fly).
   * `tokenRefreshPromise`: - function(req, err) which must return promise with new token, called only if server returns 401 status code and this function is provided.
+  * `allowEmptyToken` - allow made a request without Authorization header if token is empty (default: `false`)
   * `prefix` - prefix before token (default: `'Bearer '`)
   * If you use `auth` middleware with `retry`, `retry` must be used before `auth`. Eg. if token expired when retries apply, then `retry` can call `auth` middleware again.
 - **logger** - for logging requests and responses. Options:
@@ -47,11 +48,11 @@ Part 1: Batching several requests into one
 
 Joseph Savona [wrote](https://github.com/facebook/relay/issues/1058#issuecomment-213592051): For legacy reasons, Relay splits "plural" root queries into individual queries. In general we want to diff each root value separately, since different fields may be missing for different root values.
 
-Also if you use [react-relay-router](https://github.com/relay-tools/react-router-relay) and have multiple root queries in one route pass, you may notice that default network layer will produce several http requests. 
+Also if you use [react-relay-router](https://github.com/relay-tools/react-router-relay) and have multiple root queries in one route pass, you may notice that default network layer will produce several http requests.
 
 So for avoiding multiple http-requests, the `ReactRelayNetworkLayer` is the right way to combine it in single http-request.
 
-### Example how to enable batching 
+### Example how to enable batching
 #### ...on server
 Firstly, you should prepare **server** to proceed the batch request:
 
@@ -63,7 +64,7 @@ import bodyParser from 'body-parser';
 import myGraphqlSchema from './graphqlSchema';
 
 // setup standart `graphqlHTTP` express-middleware
-const graphQLMiddleware = graphqlHTTP({ 
+const graphQLMiddleware = graphqlHTTP({
   schema: myGraphqlSchema,
   formatError: (error) => ({ // better errors for development. `stack` used in `gqErrors` middleware
     message: error.message,
@@ -90,7 +91,7 @@ And right after server side ready to accept batch queries, you may enable batchi
 Relay.injectNetworkLayer(new RelayNetworkLayer([
   urlMiddleware({
     url: '/graphql',
-    batchUrl: '/graphql/batch', // <--- route for batch queries 
+    batchUrl: '/graphql/batch', // <--- route for batch queries
   }),
 ], { disableBatchQuery: false })); // <--- set to FALSE, or may remove `disableBatchQuery` option at all
 ```
@@ -105,7 +106,7 @@ Part 2: Middlewares
 ```js
 import Relay from 'react-relay';
 import {
-  RelayNetworkLayer, retryMiddleware, urlMiddleware, authMiddleware, loggerMiddleware, 
+  RelayNetworkLayer, retryMiddleware, urlMiddleware, authMiddleware, loggerMiddleware,
   perfMiddleware, gqErrorsMiddleware
 } from 'react-relay-network-layer';
 
@@ -136,7 +137,7 @@ Relay.injectNetworkLayer(new RelayNetworkLayer([
         .catch(err => console.log('[client.js] ERROR can not refresh token', err));
     },
   }),
-  
+
   // example of the custom inline middleware (add `X-Request-ID` to request headers)
   next => req => {
     req.headers['X-Request-ID'] = uuid.v4();
@@ -149,27 +150,27 @@ Relay.injectNetworkLayer(new RelayNetworkLayer([
 
 Middlewares on bottom layer use [fetch](https://github.com/github/fetch) method. So `req` is compliant with a `fetch()` options. And `res` can be obtained via `resPromise.then(res => ...)`, which returned by `fetch()`.
 
-Middlewares have 3 phases: 
-- `setup phase`, which runs only once, when middleware added to the NetworkLayer 
-- `capturing phase`, when you may change request object, and pass it down via `next(req)` 
+Middlewares have 3 phases:
+- `setup phase`, which runs only once, when middleware added to the NetworkLayer
+- `capturing phase`, when you may change request object, and pass it down via `next(req)`
 - `bubbling phase`, when you may change response promise, made re-request or pass it up unchanged
 
 Basic skeleton of middleware:
 ```js
 export default function skeletonMiddleware(opts = {}) {
   // [SETUP PHASE]: here you can process `opts`, when you create Middleware
-  
+
   return next => req => {
     // [CAPTURING PHASE]: here you can change `req` object, before it will pass to following middlewares.
     // ...some code which modify `req`
-    
+
     const resPromise = next(req); // pass request to following middleware and get response promise from it
-    
-    // [BUBBLING PHASE]: here you may change response of underlying middlewares, via promise syntax 
+
+    // [BUBBLING PHASE]: here you may change response of underlying middlewares, via promise syntax
     // ...some code, which may add `then()` or `catch()` to response promise
     //    resPromise.then(res => { console.log(res); return res; })
-    
-    return resPromise; // return response promise to upper middleware 
+
+    return resPromise; // return response promise to upper middleware
   };
 }
 ```
@@ -193,13 +194,13 @@ TODO
 - [*] Improve performance of `graphqlBatchHTTPWrapper`, by removing JSON.parse (need find proper way how to get result from `express-graphql` in json, not stringified)
 - [ ] Write server side middleware for `express-graphql`.
 - [ ] Find brave peoples
- - who made fixes and remove misspelling and missunderstanding in readme.MD 
+ - who made fixes and remove misspelling and missunderstanding in readme.MD
  - may be write tests (I haven't enough experience in it)
 
 
 Contribute
 ==========
-I actively welcome pull requests with code and doc fixes. 
+I actively welcome pull requests with code and doc fixes.
 Also if you made great middleware and want share it within this module, please feel free to open PR.
 
 

@@ -1,4 +1,4 @@
-/* eslint-disable no-param-reassign, arrow-body-style */
+/* eslint-disable no-param-reassign, arrow-body-style, dot-notation */
 
 import { isFunction } from '../utils';
 
@@ -11,17 +11,24 @@ class WrongTokenError extends Error {
 }
 
 export default function authMiddleware(opts = {}) {
-  const { token: tokenOrThunk, tokenRefreshPromise, prefix = 'Bearer ' } = opts;
+  const {
+    token: tokenOrThunk,
+    tokenRefreshPromise,
+    allowEmptyToken = false,
+    prefix = 'Bearer ',
+  } = opts;
 
   return next => req => {
     return new Promise((resolve, reject) => {
       const token = isFunction(tokenOrThunk) ? tokenOrThunk(req) : tokenOrThunk;
-      if (!token && tokenRefreshPromise) {
+      if (!token && tokenRefreshPromise && !allowEmptyToken) {
         reject(new WrongTokenError('Token not provided, try fetch new one'));
       }
       resolve(token);
     }).then(token => {
-      req.headers['Authorization'] = `${prefix}${token}`;
+      if (token) {
+        req.headers['Authorization'] = `${prefix}${token}`;
+      }
       return next(req);
     }).then(res => {
       if (res.status === 401 && tokenRefreshPromise) {
