@@ -21,8 +21,8 @@ Available middlewares:
 - **auth** - for adding auth token, and refreshing it if gets 401 response from server. Options:
   * `token` - string or function(req) which returns token. If function is provided, then it will be called for every request (so you may change tokens on fly).
   * `tokenRefreshPromise`: - function(req, err) which must return promise with new token, called only if server returns 401 status code and this function is provided.
-  * `allowEmptyToken` - allow made a request without Authorization header if token is empty (default: `false`)
-  * `prefix` - prefix before token (default: `'Bearer '`)
+  * `allowEmptyToken` - allow made a request without Authorization header if token is empty (default: `false`).
+  * `prefix` - prefix before token (default: `'Bearer '`).
   * If you use `auth` middleware with `retry`, `retry` must be used before `auth`. Eg. if token expired when retries apply, then `retry` can call `auth` middleware again.
 - **logger** - for logging requests and responses. Options:
   * `logger` - log function (default: `console.log.bind(console, '[RELAY-NETWORK]')`)
@@ -30,7 +30,7 @@ Available middlewares:
   * If you use `Relay@^0.8.0` you may turn on [internal Relay requests debugger](https://cloud.githubusercontent.com/assets/1946920/15735688/688ccabe-28bc-11e6-82e2-db644eb698b0.png): `import RelayNetworkDebug from 'react-relay/lib/RelayNetworkDebug';  RelayNetworkDebug.init();`
 - **perf** - simple time measure for network request. Options:
   * `logger` - log function (default: `console.log.bind(console, '[RELAY-NETWORK]')`)
-- **gqErrors** - display `errors` data to console from graphql response. If you want see stackTrace for errors, you should tune `formatError` param in `graphqlHTTP` (see example below). Options:
+- **gqErrors** - display `errors` data to console from graphql response. If you want see stackTrace for errors, you should provide `formatError` to `express-graphql` (see example below where `graphqlServer` accept `formatError` function). Options:
   * `logger` - log function (default: `console.error.bind(console)`)
   * `prefix` - prefix message (dafault: `[RELAY-NETWORK] GRAPHQL SERVER ERROR:`)
 - **defer** - _experimental_ Right now `deferMiddleware()` just set `defer` as supported option for Relay. So this middleware allow to community play with `defer()` in cases, which was [described by @wincent](https://github.com/facebook/relay/issues/288#issuecomment-199510058).
@@ -40,7 +40,7 @@ Available middlewares:
 Installation
 ============
 
-`npm install react-relay-network-layer`
+`npm install react-relay-network-layer --save`
 
 
 Part 1: Batching several requests into one
@@ -64,7 +64,7 @@ import bodyParser from 'body-parser';
 import myGraphqlSchema from './graphqlSchema';
 
 // setup standart `graphqlHTTP` express-middleware
-const graphQLMiddleware = graphqlHTTP({
+const graphqlServer = graphqlHTTP({
   schema: myGraphqlSchema,
   formatError: (error) => ({ // better errors for development. `stack` used in `gqErrors` middleware
     message: error.message,
@@ -75,12 +75,12 @@ const graphQLMiddleware = graphqlHTTP({
 // declare route for batch query
 server.use('/graphql/batch',
   bodyParser.json(),
-  graphqlBatchHTTPWrapper(graphQLMiddleware)
+  graphqlBatchHTTPWrapper(graphqlServer)
 );
 
 // declare standard graphql route
 server.use('/graphql',
-  graphQLMiddleware
+  graphqlServer
 );
 ```
 
@@ -189,10 +189,9 @@ Middlewares use LIFO (last in, first out) stack. Or simply put - use `compose` f
 
 TODO
 ====
+- [ ] Add support for graphql subscriptions. But firstly need [graphql-compose](https://github.com/nodkz/graphql-compose) for schema building, which is in heavy development right now (**planned for version 2.0.0**)  
+- [ ] Rewrite `batching` as middleware, keep in mind principles of how works [DataLoader](https://github.com/facebook/dataloader) via eventLoop (`process.nextTick()`) (**planned for version 2.0.0**)
 - [ ] Support `defer`, see [relay/issues/288](https://github.com/facebook/relay/issues/288)
-- [ ] Rewrite `batching` as middleware, keep in mind principles of how works [DataLoader](https://github.com/facebook/dataloader) via eventLoop (`process.nextTick()`)
-- [*] Improve performance of `graphqlBatchHTTPWrapper`, by removing JSON.parse (need find proper way how to get result from `express-graphql` in json, not stringified)
-- [ ] Write server side middleware for `express-graphql`.
 - [ ] Find brave peoples
  - who made fixes and remove misspelling and missunderstanding in readme.MD
  - may be write tests (I haven't enough experience in it)
