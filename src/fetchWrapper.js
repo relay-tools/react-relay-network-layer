@@ -1,7 +1,5 @@
 /* eslint-disable no-use-before-define, no-else-return, prefer-const, no-param-reassign */
 
-import 'whatwg-fetch';
-
 export default function fetchWrapper(reqFromRelay, middlewares) {
   const fetchAfterAllWrappers = (req) => {
     let { url, ...opts } = req;

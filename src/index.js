@@ -19,4 +19,3 @@ export {
   deferMiddleware,
   graphqlBatchHTTPWrapper,
 };
-

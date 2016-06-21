@@ -1,5 +1,18 @@
 ## master
 
+## 1.2.0 (June 21, 2016)
+* fix: remove `whatwg-fetch` polyfill, due problem in React Native ([issue #8](https://github.com/nodkz/react-relay-network-layer/issues/8)).
+
+If your client does not have `fetch` global method, you should include polyfill explicitly in you code:
+```js
+  import 'whatwg-fetch'; // for old browsers
+  or
+  import 'node-fetch';  // for old node versions
+  or
+  import 'fetch-everywhere'; // fresh isomorphic fetch polyfill, that supports all clients (not tested ;)
+```
+Thanks to @roman01la and @edvinerikson.
+
 ## 1.1.4 (June 15, 2016)
 * feat: add `allowEmptyToken` option for `authMiddleware` to allow made a request without Authorization header if token is empty
 

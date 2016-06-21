@@ -4,9 +4,11 @@ ReactRelayNetworkLayer
 The `ReactRelayNetworkLayer` is a [Relay Network Layer](https://facebook.github.io/relay/docs/guides-network-layer.html)
 with query batching and middleware support.
 
-Main purpose to use this NetworkLayer:
+This NetworkLayer solves following problems:
 - If your app is making enough individual queries to be a performance problem on first page load
-- If your app should manipulate request on the fly - log them, change or made some fallbacks if request fails
+- If your app should manipulate request/responce on the fly - change auth headers, request url or made some fallbacks if request fails
+
+Can be used in browser, react-native or node server for rendering. Under the hood this module uses global `fetch` method. So if your client is too old, please import explicitly proper polyfill to your code  (eg. `whatwg-fetch`, `node-fetch` or `fetch-everywhere`).
 
 Available middlewares:
 - **url** - for manipulating fetch `url` on fly via thunk. Options:
