@@ -12,19 +12,19 @@ export default function fetchWrapper(reqFromRelay, middlewares) {
       }
     }
 
-    return new Promise((resolve, reject) =>
-      fetch(url, opts)
-      .then(res =>
-        // sub-promise for combining `res` with parsed json
-        res.json()
-        .then(json => {
-          res.json = json;
-          return res;
-        })
-      )
-      .then(res => resolve(res))
-      .catch(error => reject(error))
-    );
+    return new Promise(function (resolve, reject) { // eslint-disable-line
+      return fetch(url, opts)
+        .then(res =>
+          // sub-promise for combining `res` with parsed json
+          res.json()
+          .then(json => {
+            res.json = json;
+            return res;
+          })
+        )
+        .then(res => resolve(res))
+        .catch(error => reject(error));
+    });
   };
 
   const wrappedFetch = compose(...middlewares)(fetchAfterAllWrappers);
