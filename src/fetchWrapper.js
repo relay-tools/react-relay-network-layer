@@ -12,17 +12,18 @@ export default function fetchWrapper(reqFromRelay, middlewares) {
       }
     }
 
-    return fetch(url, opts).then(res =>
-      new Promise((resolve, reject) => {
+    return new Promise((resolve, reject) =>
+      fetch(url, opts)
+      .then(res =>
+        // sub-promise for combining `res` with parsed json
         res.json()
-          .then(json => {
-            res.json = json;
-            resolve(res);
-          })
-          .catch(err => {
-            reject(err);
-          });
-      })
+        .then(json => {
+          res.json = json;
+          return res;
+        })
+      )
+      .then(res => resolve(res))
+      .catch(error => reject(error))
     );
   };
 
