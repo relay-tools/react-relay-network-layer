@@ -1,6 +1,6 @@
 ## master
 
-## 1.3.0 (July 12, 2016)
+## 1.3.1 (July 12, 2016)
 * fix: catch react-native error, when network request fails, eg. offline ([issue #7](https://github.com/nodkz/react-relay-network-layer/issues/7)).
 
 ## 1.2.0 (June 21, 2016)
