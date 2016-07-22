@@ -65,6 +65,9 @@ import { graphqlBatchHTTPWrapper } from 'react-relay-network-layer';
 import bodyParser from 'body-parser';
 import myGraphqlSchema from './graphqlSchema';
 
+const port = 3000;
+const server = express();
+
 // setup standart `graphqlHTTP` express-middleware
 const graphqlServer = graphqlHTTP({
   schema: myGraphqlSchema,
@@ -84,7 +87,12 @@ server.use('/graphql/batch',
 server.use('/graphql',
   graphqlServer
 );
+
+server.listen(port, () => {
+  console.log(`The server is running at http://localhost:${port}/`);
+});
 ```
+[More complex example](https://github.com/nodkz/react-relay-network-layer/blob/master/examples/dataLoaderPerBatchRequest.js) of how you can use a single [DataLoader](https://github.com/facebook/dataloader) for all (batched) queries within a one HTTP-request.
 
 #### ...on client
 And right after server side ready to accept batch queries, you may enable batching on the **client**:
