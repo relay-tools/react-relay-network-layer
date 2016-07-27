@@ -49,7 +49,7 @@ export default function gqErrorsMiddleware(opts = {}) {
             }
           });
         } else {
-          if (res.json.s) {
+          if (res.json.errors) {
             displayErrors(res.json.errors, { query, req, res });
           }
         }
