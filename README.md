@@ -148,9 +148,15 @@ Relay.injectNetworkLayer(new RelayNetworkLayer([
     },
   }),
 
-  // example of the custom inline middleware (add `X-Request-ID` to request headers)
+  // example of the custom inline middleware
   next => req => {
-    req.headers['X-Request-ID'] = uuid.v4();
+    req.headers['X-Request-ID'] = uuid.v4(); // add `X-Request-ID` to request headers
+    req.credentials = 'same-origin'; // provide CORS policy to XHR request in fetch method
+    
+    // internally works following code:
+    //    let { url, ...opts } = req;
+    //    fetch(url, opts)
+    // so you may provide any opts to `fetch`, setting it to `req`
     return next(req);
   }
 ], { disableBatchQuery: true }));
