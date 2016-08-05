@@ -32,7 +32,7 @@ export default function authMiddleware(opts = {}) {
       return next(req);
     }).then(res => {
       if (res.status === 401 && tokenRefreshPromise) {
-        throw new WrongTokenError('Was recieved status 401 from server', res);
+        throw new WrongTokenError('Received status 401 from server', res);
       }
       return res;
     }).catch(err => {

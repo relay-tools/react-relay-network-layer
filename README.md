@@ -4,11 +4,11 @@ ReactRelayNetworkLayer
 The `ReactRelayNetworkLayer` is a [Relay Network Layer](https://facebook.github.io/relay/docs/guides-network-layer.html)
 with query batching and middleware support.
 
-This NetworkLayer solves following problems:
+This NetworkLayer solves the following problems:
 - If your app is making enough individual queries to be a performance problem on first page load
-- If your app should manipulate request/responce on the fly - change auth headers, request url or made some fallbacks if request fails
+- If your app needs to manipulate requests/responses on the fly - change auth headers, request url or perform some fallback if request fails
 
-Can be used in browser, react-native or node server for rendering. Under the hood this module uses global `fetch` method. So if your client is too old, please import explicitly proper polyfill to your code  (eg. `whatwg-fetch`, `node-fetch` or `fetch-everywhere`).
+Can be used in browser, react-native or node server for rendering. Under the hood this module uses global `fetch` method. So if your client is too old, please import explicitly proper polyfill to your code (eg. `whatwg-fetch`, `node-fetch` or `fetch-everywhere`).
 
 Available middlewares:
 - **url** - for manipulating fetch `url` on fly via thunk. Options:
@@ -17,7 +17,7 @@ Available middlewares:
 - **retry** - for request retry if the initial request fails. Options:
   * `fetchTimeout` - number in milliseconds that defines in how much time will request timeout after it has been sent to the server (default: `15000`).
   * `retryDelays` - array of millisecond that defines the values on which retries are based on (default: `[1000, 3000]`).
-  * `statusCodes` - array of response status codes which will fire up retryMiddleware (default: `status < 200 or status > 300`).  
+  * `statusCodes` - array of response status codes which will fire up retryMiddleware (default: `status < 200 or status > 300`).
   * `allowMutations` - by default retries disabled for mutations, you may allow process retries for them passing `true` (default: `false`)
   * `forceRetry` - function(cb, delay), when request is delayed for next retry, middleware will call this function and pass to it a callback and delay time. When you call this callback, middleware will proceed request immediately (default: `false`).
 - **auth** - for adding auth token, and refreshing it if gets 401 response from server. Options:
@@ -34,7 +34,7 @@ Available middlewares:
   * `logger` - log function (default: `console.log.bind(console, '[RELAY-NETWORK]')`)
 - **gqErrors** - display `errors` data to console from graphql response. If you want see stackTrace for errors, you should provide `formatError` to `express-graphql` (see example below where `graphqlServer` accept `formatError` function). Options:
   * `logger` - log function (default: `console.error.bind(console)`)
-  * `prefix` - prefix message (dafault: `[RELAY-NETWORK] GRAPHQL SERVER ERROR:`)
+  * `prefix` - prefix message (default: `[RELAY-NETWORK] GRAPHQL SERVER ERROR:`)
 - **defer** - _experimental_ Right now `deferMiddleware()` just set `defer` as supported option for Relay. So this middleware allow to community play with `defer()` in cases, which was [described by @wincent](https://github.com/facebook/relay/issues/288#issuecomment-199510058).
 
 [CHANGELOG](https://github.com/nodkz/react-relay-network-layer/blob/master/CHANGELOG.md)
@@ -152,7 +152,7 @@ Relay.injectNetworkLayer(new RelayNetworkLayer([
   next => req => {
     req.headers['X-Request-ID'] = uuid.v4(); // add `X-Request-ID` to request headers
     req.credentials = 'same-origin'; // provide CORS policy to XHR request in fetch method
-    
+
     // internally works following code:
     //    let { url, ...opts } = req;
     //    fetch(url, opts)
@@ -205,12 +205,12 @@ Middlewares use LIFO (last in, first out) stack. Or simply put - use `compose` f
 
 TODO
 ====
-- [ ] Add support for graphql subscriptions. But firstly need [graphql-compose](https://github.com/nodkz/graphql-compose) for schema building, which is in heavy development right now (**planned for version 2.0.0**)  
+- [ ] Add support for graphql subscriptions. But firstly need [graphql-compose](https://github.com/nodkz/graphql-compose) for schema building, which is in heavy development right now (**planned for version 2.0.0**)
 - [ ] Add tests and cover by flowtype
 - [ ] Rewrite `batching` as middleware, keep in mind principles of how works [DataLoader](https://github.com/facebook/dataloader) via eventLoop (`process.nextTick()`) (**planned for version 2.0.0**)
 - [ ] Support `defer`, see [relay/issues/288](https://github.com/facebook/relay/issues/288)
 - [ ] Find brave peoples
- - who made fixes and remove misspelling and missunderstanding in readme.MD
+ - who made fixes and remove misspelling and misunderstanding in readme.MD
 
 
 Contribute

@@ -2,7 +2,7 @@
 Example of how you can use a single DataLoader for all (batched) queries
 within a single HTTP-request.
 
-Tunned for performance, to avoid creating unnececary functions per each request.
+Tuned for performance, to avoid creating unnecessary functions per request.
 */
 
 import express from 'express';
@@ -29,7 +29,7 @@ const initDataLoaders = () => {
   };
 };
 
-// for performance reason, create once error function converter (rather than for every request)
+// for performance reasons, create a single error function converter (rather than every request)
 const formatError = (error) => ({
   // better errors for development. `stack` used in `gqErrors` middleware
   message: error.message,
@@ -51,9 +51,9 @@ const graphqlSettingsPerRequest = (req) => ({
 // Declare route for batch query
 
 // `graphqlBatchHTTPWrapper` and `graphqlHTTP` return arrow functions.
-// So for performance reason declare it once outside (req, res, next) => {} block.
-// Rather than declare it every time for each request,
-// as it will result in the garbage collector being invoked way more than is necessary.
+// For performance reasons, declare it once outside (req, res, next) => {} block,
+// rather than for every request. Otherwise, it will result in the garbage collector
+// being invoked way more than necessary.
 const graphqlBatchMiddleware = graphqlBatchHTTPWrapper(
   graphqlHTTP(req => req.graphqlServerSettings)
 );
