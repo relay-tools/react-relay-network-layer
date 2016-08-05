@@ -1,5 +1,5 @@
 export default function (graphqlHTTPMiddleware) {
-  return (req, res, next) => {
+  return (req, res) => {
     const subResponses = [];
     Promise.all(
       req.body.map(data =>
@@ -28,20 +28,19 @@ export default function (graphqlHTTPMiddleware) {
           graphqlHTTPMiddleware(subRequest, subResponse);
         })
       )
-    ).then(
-      (responses) => {
-        let response = '';
-        responses.forEach(({ status, id, payload }, idx) => {
-          if (status) {
-            res.status(status);
-          }
-          const comma = responses.length - 1 > idx ? ',' : '';
-          response += `{ "id":"${id}", "payload":${payload} }${comma}`;
-        });
-        res.set('Content-Type', 'application/json');
-        res.send(`[${response}]`);
-        next();
-      }
-    );
+    ).then(responses => {
+      let response = '';
+      responses.forEach(({ status, id, payload }, idx) => {
+        if (status) {
+          res.status(status);
+        }
+        const comma = responses.length - 1 > idx ? ',' : '';
+        response += `{ "id":"${id}", "payload":${payload} }${comma}`;
+      });
+      res.set('Content-Type', 'application/json');
+      res.send(`[${response}]`);
+    }).catch(err => {
+      res.status(500).send({ error: err.message });
+    });
   };
 }
