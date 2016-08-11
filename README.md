@@ -11,6 +11,7 @@ This NetworkLayer solves the following problems:
 Can be used in browser, react-native or node server for rendering. Under the hood this module uses global `fetch` method. So if your client is too old, please import explicitly proper polyfill to your code (eg. `whatwg-fetch`, `node-fetch` or `fetch-everywhere`).
 
 Available middlewares:
+- **inline middleware** - your custom logic via `next => req => { /* your code */ }`. See example below where added `credentials` and `headers` to the `fetch` method.
 - **url** - for manipulating fetch `url` on fly via thunk. Options:
   * `url` - string or function(req) for single request (default: `/graphql`)
   * `batchUrl` -  string or function(req) for batch request, server must be prepared for such requests (default: `/graphql/batch`)
@@ -150,13 +151,15 @@ Relay.injectNetworkLayer(new RelayNetworkLayer([
 
   // example of the custom inline middleware
   next => req => {
-    req.headers['X-Request-ID'] = uuid.v4(); // add `X-Request-ID` to request headers
-    req.credentials = 'same-origin'; // provide CORS policy to XHR request in fetch method
-
-    // internally works following code:
+    // `req` is an object with settings for `fetch` function. It's not an express request object.
+    // Internally works following code:
     //    let { url, ...opts } = req;
     //    fetch(url, opts)
-    // so you may provide any opts to `fetch`, setting it to `req`
+    // So `req` is a fetch options. And into this options, I added `url` prop, which will be extracted as shown above.
+    // You have fully control under `fetch` via `req` object.
+    
+    req.headers['X-Request-ID'] = uuid.v4(); // add `X-Request-ID` to request headers
+    req.credentials = 'same-origin'; // provide CORS policy to XHR request in fetch method
     return next(req);
   }
 ], { disableBatchQuery: true }));
