@@ -11,31 +11,32 @@ This NetworkLayer solves the following problems:
 Can be used in browser, react-native or node server for rendering. Under the hood this module uses global `fetch` method. So if your client is too old, please import explicitly proper polyfill to your code (eg. `whatwg-fetch`, `node-fetch` or `fetch-everywhere`).
 
 Available middlewares:
-- **inline middleware** - your custom logic via `next => req => { /* your code */ }`. See example below where added `credentials` and `headers` to the `fetch` method.
+- **inline middleware** - your custom logic via `next => req => { /* your code */ }`. 
+  - See example below where added `credentials` and `headers` to the `fetch` method.
 - **url** - for manipulating fetch `url` on fly via thunk. Options:
-  * `url` - string or function(req) for single request (default: `/graphql`)
-  * `batchUrl` -  string or function(req) for batch request, server must be prepared for such requests (default: `/graphql/batch`)
+  - `url` - string or function(req) for single request (default: `/graphql`)
+  - `batchUrl` -  string or function(req) for batch request, server must be prepared for such requests (default: `/graphql/batch`)
 - **retry** - for request retry if the initial request fails. Options:
-  * `fetchTimeout` - number in milliseconds that defines in how much time will request timeout after it has been sent to the server (default: `15000`).
-  * `retryDelays` - array of millisecond that defines the values on which retries are based on (default: `[1000, 3000]`).
-  * `statusCodes` - array of response status codes which will fire up retryMiddleware (default: `status < 200 or status > 300`).
-  * `allowMutations` - by default retries disabled for mutations, you may allow process retries for them passing `true` (default: `false`)
-  * `forceRetry` - function(cb, delay), when request is delayed for next retry, middleware will call this function and pass to it a callback and delay time. When you call this callback, middleware will proceed request immediately (default: `false`).
+  - `fetchTimeout` - number in milliseconds that defines in how much time will request timeout after it has been sent to the server (default: `15000`).
+  - `retryDelays` - array of millisecond that defines the values on which retries are based on (default: `[1000, 3000]`).
+  - `statusCodes` - array of response status codes which will fire up retryMiddleware (default: `status < 200 or status > 300`).
+  - `allowMutations` - by default retries disabled for mutations, you may allow process retries for them passing `true` (default: `false`)
+  - `forceRetry` - function(cb, delay), when request is delayed for next retry, middleware will call this function and pass to it a callback and delay time. When you call this callback, middleware will proceed request immediately (default: `false`).
 - **auth** - for adding auth token, and refreshing it if gets 401 response from server. Options:
-  * `token` - string or function(req) which returns token. If function is provided, then it will be called for every request (so you may change tokens on fly).
-  * `tokenRefreshPromise`: - function(req, err) which must return promise with new token, called only if server returns 401 status code and this function is provided.
-  * `allowEmptyToken` - allow made a request without Authorization header if token is empty (default: `false`).
-  * `prefix` - prefix before token (default: `'Bearer '`).
-  * If you use `auth` middleware with `retry`, `retry` must be used before `auth`. Eg. if token expired when retries apply, then `retry` can call `auth` middleware again.
+  - `token` - string or function(req) which returns token. If function is provided, then it will be called for every request (so you may change tokens on fly).
+  - `tokenRefreshPromise`: - function(req, err) which must return promise with new token, called only if server returns 401 status code and this function is provided.
+  - `allowEmptyToken` - allow made a request without Authorization header if token is empty (default: `false`).
+  - `prefix` - prefix before token (default: `'Bearer '`).
+  - If you use `auth` middleware with `retry`, `retry` must be used before `auth`. Eg. if token expired when retries apply, then `retry` can call `auth` middleware again.
 - **logger** - for logging requests and responses. Options:
-  * `logger` - log function (default: `console.log.bind(console, '[RELAY-NETWORK]')`)
-  * If you use `Relay@^0.9.0` you may turn on relay's internal [extended mutation debugger](https://twitter.com/steveluscher/status/738101549591732225). For this you should open browser console and type `__DEV__=true`. With webpack you may use `webpack.BannerPlugin('__DEV__=true;', {raw: true})` or `webpack.DefinePlugin({__DEV__: true})`.
-  * If you use `Relay@^0.8.0` you may turn on [internal Relay requests debugger](https://cloud.githubusercontent.com/assets/1946920/15735688/688ccabe-28bc-11e6-82e2-db644eb698b0.png): `import RelayNetworkDebug from 'react-relay/lib/RelayNetworkDebug';  RelayNetworkDebug.init();`
+  - `logger` - log function (default: `console.log.bind(console, '[RELAY-NETWORK]')`)
+  - If you use `Relay@^0.9.0` you may turn on relay's internal [extended mutation debugger](https://twitter.com/steveluscher/status/738101549591732225). For this you should open browser console and type `__DEV__=true`. With webpack you may use `webpack.BannerPlugin('__DEV__=true;', {raw: true})` or `webpack.DefinePlugin({__DEV__: true})`.
+  - If you use `Relay@^0.8.0` you may turn on [internal Relay requests debugger](https://cloud.githubusercontent.com/assets/1946920/15735688/688ccabe-28bc-11e6-82e2-db644eb698b0.png): `import RelayNetworkDebug from 'react-relay/lib/RelayNetworkDebug';  RelayNetworkDebug.init();`
 - **perf** - simple time measure for network request. Options:
-  * `logger` - log function (default: `console.log.bind(console, '[RELAY-NETWORK]')`)
+  - `logger` - log function (default: `console.log.bind(console, '[RELAY-NETWORK]')`)
 - **gqErrors** - display `errors` data to console from graphql response. If you want see stackTrace for errors, you should provide `formatError` to `express-graphql` (see example below where `graphqlServer` accept `formatError` function). Options:
-  * `logger` - log function (default: `console.error.bind(console)`)
-  * `prefix` - prefix message (default: `[RELAY-NETWORK] GRAPHQL SERVER ERROR:`)
+  - `logger` - log function (default: `console.error.bind(console)`)
+  - `prefix` - prefix message (default: `[RELAY-NETWORK] GRAPHQL SERVER ERROR:`)
 - **defer** - _experimental_ Right now `deferMiddleware()` just set `defer` as supported option for Relay. So this middleware allow to community play with `defer()` in cases, which was [described by @wincent](https://github.com/facebook/relay/issues/288#issuecomment-199510058).
 
 [CHANGELOG](https://github.com/nodkz/react-relay-network-layer/blob/master/CHANGELOG.md)
