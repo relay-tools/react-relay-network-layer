@@ -20,7 +20,11 @@ export default function (graphqlHTTPMiddleware) {
             setHeader() { return this; },
             header() {},
             write(payload) { this.payload = payload; },
-            end() {
+            end(payload) {
+              // support express-graphql@0.5.4
+              if (payload) {
+                this.payload = payload;
+              }
               resolve({ status: this.statusCode, id: data.id, payload: this.payload });
             },
           };
