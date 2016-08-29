@@ -1,5 +1,8 @@
 ## master
 
+- Return main promise. Thanks to @helfer https://github.com/graphql/express-graphql/pull/99
+Returning the main promise will let you do things like time execution and perform some cleanups after the request is processed.
+
 ## 1.3.4 (August 29, 2016)
 * fix: support `express-graphql@0.5.4`. Thanks @genbit [issue #19](https://github.com/nodkz/react-relay-network-layer/issues/19)
 

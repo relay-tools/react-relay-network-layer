@@ -1,7 +1,7 @@
 export default function (graphqlHTTPMiddleware) {
   return (req, res) => {
     const subResponses = [];
-    Promise.all(
+    return Promise.all(
       req.body.map(data =>
         new Promise((resolve) => {
           const subRequest = {
