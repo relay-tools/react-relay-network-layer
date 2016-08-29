@@ -1,5 +1,8 @@
 ## master
 
+## 1.3.4 (August 29, 2016)
+* fix: support `express-graphql@0.5.4`. Thanks @genbit [issue #19](https://github.com/nodkz/react-relay-network-layer/issues/19)
+
 ## 1.3.3 (August 5, 2016)
 * fix: batch express middleware. It should not call next middleware. Thanks @genbit [issue #13](https://github.com/nodkz/react-relay-network-layer/issues/13)
 
