@@ -21,6 +21,10 @@ export default function fetchWrapper(reqFromRelay, middlewares) {
             res.json = json;
             return res;
           })
+          .catch(e => {
+              res.json = {};
+              return res;
+          })
         )
         .then(res => resolve(res))
         .catch(error => reject(error));
