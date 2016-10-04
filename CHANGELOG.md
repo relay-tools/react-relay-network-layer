@@ -1,5 +1,7 @@
 ## master
 
+## 1.3.5 (October 4, 2016)
+- Handle malformed or non existent JSON in response (#20). Thanks to @JonathanUsername
 - Return main promise. Thanks to @helfer https://github.com/graphql/express-graphql/pull/99
 Returning the main promise will let you do things like time execution and perform some cleanups after the request is processed.
 
