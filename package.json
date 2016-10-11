@@ -13,7 +13,7 @@
     "build-cjs": "rimraf lib && BABEL_ENV=cjs babel src -d lib",
     "build-es": "rimraf es && BABEL_ENV=es babel src -d es",
     "lint": "eslint src test *.js",
-    "prepublish": "npm run build",
+    "prepublish": "npm run test && npm run build",
     "test": "mocha --require test/mocha-bootload --compilers js:babel-core/register test/*.test.js"
   },
   "repository": {
