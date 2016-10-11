@@ -1,5 +1,11 @@
 ## master
 
+## 1.3.6 (October 11, 2016)
+#### Thanks to @kosmikko for his PR #21
+- Catch unhandled promises, (closes #7 Red screen for react-native when network problem occurs).
+- Add tests.
+- Remove unnecessary wrapping Promise.
+
 ## 1.3.5 (October 4, 2016)
 - Handle malformed or non existent JSON in response (#20). Thanks to @JonathanUsername
 - Return main promise. Thanks to @helfer https://github.com/graphql/express-graphql/pull/99
