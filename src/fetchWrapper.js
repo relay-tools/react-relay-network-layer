@@ -12,23 +12,20 @@ export default function fetchWrapper(reqFromRelay, middlewares) {
       }
     }
 
-    return new Promise(function (resolve, reject) { // eslint-disable-line
-      return fetch(url, opts)
-        .then(res =>
-          // sub-promise for combining `res` with parsed json
-          res.json()
-          .then(json => {
-            res.json = json;
-            return res;
-          })
-          .catch(e => {
-              res.json = {};
-              return res;
-          })
-        )
-        .then(res => resolve(res))
-        .catch(error => reject(error));
-    });
+    return fetch(url, opts)
+      .then(res =>
+        // sub-promise for combining `res` with parsed json
+        res.json()
+        .then(json => {
+          res.json = json;
+          return res;
+        })
+        .catch(e => {
+          console.warn('error parsing response json', e); // eslint-disable-line no-console
+          res.json = {};
+          return res;
+        })
+      );
   };
 
   const wrappedFetch = compose(...middlewares)(fetchAfterAllWrappers);

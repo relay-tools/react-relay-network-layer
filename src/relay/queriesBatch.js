@@ -14,15 +14,15 @@ export default function queriesBatch(relayRequestList, fetchWithMiddleware) {
     method: 'POST',
     headers: {
       Accept: '*/*',
-      'Content-Type': 'application/json'
-    }
+      'Content-Type': 'application/json',
+    },
   };
 
   req.body = JSON.stringify(
     Object.keys(requestMap).map((id) => ({
       id,
       query: requestMap[id].getQueryString(),
-      variables: requestMap[id].getVariables()
+      variables: requestMap[id].getVariables(),
     }))
   );
 
@@ -37,5 +37,9 @@ export default function queriesBatch(relayRequestList, fetchWithMiddleware) {
           );
         }
       });
+    }).catch(e => {
+      return Promise.all(relayRequestList.map(relayRequest => {
+        return relayRequest.reject(e);
+      }));
     });
 }
