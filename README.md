@@ -159,6 +159,7 @@ Relay.injectNetworkLayer(new RelayNetworkLayer([
     // So `req` is a fetch options. And into this options, I added `url` prop, which will be extracted as shown above.
     // You have fully control under `fetch` via `req` object.
     
+    req.method = 'GET'; // change default POST request method to GET
     req.headers['X-Request-ID'] = uuid.v4(); // add `X-Request-ID` to request headers
     req.credentials = 'same-origin'; // provide CORS policy to XHR request in fetch method
     return next(req);
