@@ -1,6 +1,6 @@
 {
   "name": "react-relay-network-layer",
-  "version": "1.3.6",
+  "version": "1.3.7",
   "description": "Network Layer for React Relay and Express (Batch Queries, AuthToken, Logging, Retry)",
   "files": [
     "es",

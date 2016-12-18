@@ -1,5 +1,8 @@
 ## master
 
+## 1.3.7 (December 18, 2016)
+- Fix `formatRequestErrors` for Absinthe (GraphQL for Elixir) #27 (thanks to @redjohn)
+
 ## 1.3.6 (October 11, 2016)
 #### Thanks to @kosmikko for his PR #21
 - Catch unhandled promises, (closes #7 Red screen for react-native when network problem occurs).
