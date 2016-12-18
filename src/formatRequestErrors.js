@@ -19,7 +19,7 @@ export default function formatRequestErrors(request, errors) {
         const offset = Math.min(column - 1, CONTEXT_BEFORE);
         return [
           queryLine.substr(column - 1 - offset, CONTEXT_LENGTH),
-          `${' '.repeat(offset)}^^^`,
+          `${' '.repeat(Math.max(offset, 0))}^^^`,
         ].map(messageLine => indent + messageLine).join('\n');
       }).join('\n')) :
       '';
