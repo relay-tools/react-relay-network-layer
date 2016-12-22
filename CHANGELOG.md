@@ -1,5 +1,9 @@
 ## master
 
+## 1.3.8 (December 22, 2016)
+- Configurable header name for auth middleware #28 (thanks to @tehwalris)
+For `auth` middleware added `header` option: name of the HTTP header to pass the token in (default: `'Authorization'`).
+
 ## 1.3.7 (December 18, 2016)
 - Fix `formatRequestErrors` for Absinthe (GraphQL for Elixir) #27 (thanks to @redjohn)
 
