@@ -209,6 +209,10 @@ Middlewares use LIFO (last in, first out) stack. Or simply put - use `compose` f
  - chain to `resPromise.then(res => res.json())` and pass this promise for resolving/rejecting Relay requests.
 
 
+Recommended modules
+==========
+- **[babel-plugin-transform-relay-hot](https://github.com/nodkz/babel-plugin-transform-relay-hot)** - Babel 6 plugin for transforming `Relay.QL` tagged templates via the GraphQL json schema file. Each time when schema file was changed, the wrapper updates instance of standard `babelRelayPlugin` with new schema without completely restarting dev server.
+
 TODO
 ====
 - [ ] Add support for graphql subscriptions. But firstly need [graphql-compose](https://github.com/nodkz/graphql-compose) for schema building, which is in heavy development right now (**planned for version 2.0.0**)
