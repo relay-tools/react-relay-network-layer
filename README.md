@@ -1,5 +1,7 @@
 ReactRelayNetworkLayer
 ======================
+[![](https://img.shields.io/npm/v/react-relay-network-layer.svg)](https://www.npmjs.com/package/react-relay-network-layer)
+[![npm](https://img.shields.io/npm/dt/react-relay-network-layer.svg)](https://www.npmjs.com/package/react-relay-network-layer)
 
 The `ReactRelayNetworkLayer` is a [Relay Network Layer](https://facebook.github.io/relay/docs/guides-network-layer.html)
 with query batching and middleware support.
