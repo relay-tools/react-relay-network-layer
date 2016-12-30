@@ -11,7 +11,7 @@ This NetworkLayer solves the following problems:
 Can be used in browser, react-native or node server for rendering. Under the hood this module uses global `fetch` method. So if your client is too old, please import explicitly proper polyfill to your code (eg. `whatwg-fetch`, `node-fetch` or `fetch-everywhere`).
 
 Available middlewares:
-- **inline middleware** - your custom logic via `next => req => { /* your code */ }`. 
+- **inline middleware** - your custom logic via `next => req => { /* your code */ }`.
   - See example below where added `credentials` and `headers` to the `fetch` method.
 - **url** - for manipulating fetch `url` on fly via thunk. Options:
   - `url` - string or function(req) for single request (default: `/graphql`)
@@ -97,6 +97,8 @@ server.listen(port, () => {
 ```
 [More complex example](https://github.com/nodkz/react-relay-network-layer/blob/master/examples/dataLoaderPerBatchRequest.js) of how you can use a single [DataLoader](https://github.com/facebook/dataloader) for all (batched) queries within a one HTTP-request.
 
+If you are on Koa@2, (koa-graphql-batch)(https://github.com/mattecapu/koa-graphql-batch) provides the same functionality as `graphqlBatchHTTPWrapper` (see package docs for usage example).
+
 #### ...on client
 And right after server side ready to accept batch queries, you may enable batching on the **client**:
 
@@ -159,7 +161,7 @@ Relay.injectNetworkLayer(new RelayNetworkLayer([
     //    fetch(url, opts)
     // So `req` is a fetch options. And into this options, I added `url` prop, which will be extracted as shown above.
     // You have fully control under `fetch` via `req` object.
-    
+
     req.method = 'GET'; // change default POST request method to GET
     req.headers['X-Request-ID'] = uuid.v4(); // add `X-Request-ID` to request headers
     req.credentials = 'same-origin'; // provide CORS policy to XHR request in fetch method
