@@ -1,5 +1,8 @@
 ## master
 
+## 1.3.9 (December 30, 2016)
+- Auth middleware: when client makes multiples relay requests with expired token, we only need to refresh token once for those requests. #32 (thanks to @alexxv)
+
 ## 1.3.8 (December 22, 2016)
 - Configurable header name for auth middleware #28 (thanks to @tehwalris)
 For `auth` middleware added `header` option: name of the HTTP header to pass the token in (default: `'Authorization'`).
