@@ -13,8 +13,8 @@ This NetworkLayer solves the following problems:
 Can be used in browser, react-native or node server for rendering. Under the hood this module uses global `fetch` method. So if your client is too old, please import explicitly proper polyfill to your code (eg. `whatwg-fetch`, `node-fetch` or `fetch-everywhere`).
 
 Available middlewares:
-- **inline middleware** - your custom logic via `next => req => { /* your code */ }`.
-  - See example below where added `credentials` and `headers` to the `fetch` method.
+- **custom inline middleware** - [see example](https://github.com/nodkz/react-relay-network-layer#example-of-injecting-networklayer-with-middlewares-on-the-client-side) below where added `credentials` and `headers` to the `fetch` method.
+  - `next => req => { /* your modification of 'req' object */ return next(req); }` .
 - **url** - for manipulating fetch `url` on fly via thunk. Options:
   - `url` - string or function(req) for single request (default: `/graphql`)
   - `batchUrl` -  string or function(req) for batch request, server must be prepared for such requests (default: `/graphql/batch`)
