@@ -40,17 +40,17 @@ export default function authMiddleware(opts = {}) {
       return res;
     }).catch(err => {
       if (err.name === 'WrongTokenError') {
-
         if (!tokenRefreshInProgress) {
-          tokenRefreshInProgress = tokenRefreshPromise(req, err.res)
-          .then(newToken => {
+          tokenRefreshInProgress = tokenRefreshPromise(req, err.res).then(newToken => {
             tokenRefreshInProgress = null;
-            req.headers[header] = `${prefix}${newToken}`;
-            return next(req); // re-run query with new token
+            return newToken;
           });
         }
 
-        return tokenRefreshInProgress;
+        return tokenRefreshInProgress.then(newToken => {
+          req.headers[header] = `${prefix}${newToken}`;
+          return next(req); // re-run query with new token
+        });
       }
 
       throw err;
