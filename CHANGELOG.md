@@ -1,5 +1,10 @@
 ## master
 
+## 1.4.0 (February 06, 2017)
+- feat(Mutation): Add support to multiple files upload [relay#586](https://github.com/facebook/relay/issues/586). #38 (thanks to @giautm)
+- fix(Auth middleware): Only first request that failed during tokenRefresh was retries. #37 (thanks to @alexxv)
+- chore(Packages): Update dev packages. Add yarn. 
+
 ## 1.3.9 (December 30, 2016)
 - Auth middleware: when client makes multiples relay requests with expired token, we only need to refresh token once for those requests. #32 (thanks to @alexxv)
 
