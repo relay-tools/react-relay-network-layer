@@ -99,7 +99,7 @@ server.listen(port, () => {
 ```
 [More complex example](https://github.com/nodkz/react-relay-network-layer/blob/master/examples/dataLoaderPerBatchRequest.js) of how you can use a single [DataLoader](https://github.com/facebook/dataloader) for all (batched) queries within a one HTTP-request.
 
-If you are on Koa@2, (koa-graphql-batch)(https://github.com/mattecapu/koa-graphql-batch) provides the same functionality as `graphqlBatchHTTPWrapper` (see package docs for usage example).
+If you are on Koa@2, [koa-graphql-batch](https://github.com/mattecapu/koa-graphql-batch) provides the same functionality as `graphqlBatchHTTPWrapper` (see its docs for usage example).
 
 #### ...on client
 And right after server side ready to accept batch queries, you may enable batching on the **client**:
