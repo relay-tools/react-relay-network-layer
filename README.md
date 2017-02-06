@@ -47,7 +47,11 @@ Available middlewares:
 Installation
 ============
 
-`npm install react-relay-network-layer --save`
+```
+yarn add react-relay-network-layer
+OR
+npm install react-relay-network-layer --save
+```
 
 
 Part 1: Batching several requests into one
