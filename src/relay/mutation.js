@@ -55,7 +55,13 @@ function _mutationWithFiles(relayRequest) {
     formData.append('query', relayRequest.getQueryString());
     formData.append('variables', JSON.stringify(relayRequest.getVariables()));
     Object.keys(files).forEach(filename => {
-      formData.append(filename, files[filename]);
+      if (Array.isArray(files[filename])) {
+        files[filename].forEach((file) => {
+          formData.append(filename, file);
+        });
+      } else {
+        formData.append(filename, files[filename]);
+      }
     });
     req.body = formData;
   }
