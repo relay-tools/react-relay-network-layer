@@ -1,5 +1,3 @@
-/* eslint-disable prefer-template */
-
 /**
  * Formats an error response from GraphQL server request.
  */

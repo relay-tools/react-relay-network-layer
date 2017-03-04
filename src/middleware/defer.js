@@ -1,3 +1,5 @@
+/* eslint-disable no-unused-vars */
+
 export default function deferMiddleware(opts = {}) {
   const middleware = next => req => next(req);
 

@@ -18,7 +18,7 @@ export default function mutation(relayRequest, fetchWithMiddleware) {
 
   return fetchWithMiddleware(req)
     .then(payload => {
-      if (payload.hasOwnProperty('errors')) {
+      if ({}.hasOwnProperty.call(payload, 'errors')) {
         const error = new Error(
           'Server request for mutation `' + relayRequest.getDebugName() + '` ' +
           'failed for the following reasons:\n\n' +

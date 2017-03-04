@@ -1,4 +1,4 @@
-/* eslint-disable no-use-before-define, no-else-return, prefer-const, no-param-reassign */
+/* eslint-disable no-param-reassign */
 
 export default function fetchWrapper(reqFromRelay, middlewares) {
   const fetchAfterAllWrappers = (req) => {
@@ -24,7 +24,7 @@ export default function fetchWrapper(reqFromRelay, middlewares) {
           console.warn('error parsing response json', e); // eslint-disable-line no-console
           res.json = {};
           return res;
-        })
+        }),
       );
   };
 

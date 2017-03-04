@@ -221,15 +221,6 @@ Recommended modules
 ==========
 - **[babel-plugin-transform-relay-hot](https://github.com/nodkz/babel-plugin-transform-relay-hot)** - Babel 6 plugin for transforming `Relay.QL` tagged templates via the GraphQL json schema file. Each time when schema file was changed, the wrapper updates instance of standard `babelRelayPlugin` with new schema without completely restarting dev server.
 
-TODO
-====
-- [ ] Add support for graphql subscriptions. But firstly need [graphql-compose](https://github.com/nodkz/graphql-compose) for schema building, which is in heavy development right now (**planned for version 2.0.0**)
-- [ ] Add tests and cover by flowtype
-- [ ] Rewrite `batching` as middleware, keep in mind principles of how works [DataLoader](https://github.com/facebook/dataloader) via eventLoop (`process.nextTick()`) (**planned for version 2.0.0**)
-- [ ] Support `defer`, see [relay/issues/288](https://github.com/facebook/relay/issues/288)
-- [ ] Find brave peoples
- - who made fixes and remove misspelling and misunderstanding in readme.MD
-
 
 Contribute
 ==========

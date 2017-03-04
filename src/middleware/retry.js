@@ -1,6 +1,6 @@
 /* eslint-disable no-console */
 
-const timeoutError = new Error("fetch timeout");
+const timeoutError = new Error('fetch timeout');
 
 function isFunction(value) {
   return !!(value && value.constructor && value.call && value.apply);

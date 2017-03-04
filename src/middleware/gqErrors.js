@@ -1,4 +1,4 @@
-/* eslint-disable no-console no-use-before-define */
+/* eslint-disable no-console */
 
 export default function gqErrorsMiddleware(opts = {}) {
   const logger = opts.logger || console.error.bind(console);
@@ -48,10 +48,8 @@ export default function gqErrorsMiddleware(opts = {}) {
               displayErrors(batchItem.payload.errors, { query, req, res });
             }
           });
-        } else {
-          if (res.json.errors) {
-            displayErrors(res.json.errors, { query, req, res });
-          }
+        } else if (res.json.errors) {
+          displayErrors(res.json.errors, { query, req, res });
         }
       }
       return res;

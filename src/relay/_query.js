@@ -25,7 +25,7 @@ export function queryPre(relayRequest) {
 
 export function queryPost(relayRequest, fetchPromise) {
   return fetchPromise.then(payload => {
-    if (payload.hasOwnProperty('errors')) {
+    if ({}.hasOwnProperty.call(payload, 'errors')) {
       const error = new Error(
         'Server request for query `' + relayRequest.getDebugName() + '` ' +
         'failed for the following reasons:\n\n' +
@@ -33,7 +33,7 @@ export function queryPost(relayRequest, fetchPromise) {
       );
       error.source = payload;
       relayRequest.reject(error);
-    } else if (!payload.hasOwnProperty('data')) {
+    } else if (!{}.hasOwnProperty.call(payload, 'data')) {
       relayRequest.reject(new Error(
         'Server response was missing for query `' + relayRequest.getDebugName() +
         '`.'
