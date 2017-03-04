@@ -71,7 +71,6 @@
     "build-lib": "rimraf lib && BABEL_ENV=lib babel src -d lib",
     "build-es": "rimraf es && BABEL_ENV=es babel src -d es",
     "lint": "eslint src test *.js",
-    "prepublish": "npm run test && npm run build",
     "coverage": "nyc npm run test",
     "test": "npm run lint && BABEL_ENV=lib mocha --require test/mocha-bootload --compilers js:babel-register test/*.test.js",
     "semantic-release": "semantic-release pre && npm publish && semantic-release post"
