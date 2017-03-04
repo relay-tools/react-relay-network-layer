@@ -58,4 +58,30 @@ describe('Batch tests', () => {
     const req2 = mockReq(2);
     assert.isFulfilled(rnl.sendQueries([req1, req2]));
   });
+
+  it('should handle responces without payload wrapper', () => {
+    fetchMock.mock({
+      matcher: '/graphql/batch',
+      response: {
+        status: 200,
+        body: [
+          {
+            id: 1,
+            errors: [
+              { location: 1, message: 'major error' },
+            ],
+          },
+          { id: 2, data: {} },
+        ],
+      },
+      method: 'POST',
+    });
+
+    const req1 = mockReq(1);
+    req1.reject = (err) => {
+      assert(err instanceof Error, 'should be an error');
+    };
+    const req2 = mockReq(2);
+    assert.isFulfilled(rnl.sendQueries([req1, req2]));
+  });
 });

@@ -27,13 +27,22 @@ export default function queriesBatch(relayRequestList, fetchWithMiddleware) {
   );
 
   return fetchWithMiddleware(req)
-    .then(payloadList => {
-      payloadList.forEach(({ id, payload }) => {
-        const relayRequest = requestMap[id];
+    .then(batchResponses => {
+      batchResponses.forEach((res) => {
+        if (!res) return;
+        const relayRequest = requestMap[res.id];
+
         if (relayRequest) {
           queryPost(
             relayRequest,
-            new Promise(resolve => { resolve(payload); })
+            new Promise(resolve => {
+              if (res.payload) {
+                resolve(res.payload);
+                return;
+              }
+              // compatibility with graphene-django and apollo-server batch format
+              resolve(res);
+            })
           );
         }
       });
