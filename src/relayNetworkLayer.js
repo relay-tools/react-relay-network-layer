@@ -1,5 +1,3 @@
-/* eslint-disable arrow-body-style, no-unused-vars */
-
 import queries from './relay/queries';
 import queriesBatch from './relay/queriesBatch';
 import mutation from './relay/mutation';
@@ -21,29 +19,35 @@ export default class RelayNetworkLayer {
         }
       }
     });
+
+    this.supports = this.supports.bind(this);
+    this.sendQueries = this.sendQueries.bind(this);
+    this.sendMutation = this.sendMutation.bind(this);
+    this._fetchWithMiddleware = this._fetchWithMiddleware.bind(this);
+    this._isBatchQueriesDisabled = this._isBatchQueriesDisabled.bind(this);
   }
 
-  supports = (...options) => {
+  supports(...options) {
     return options.every(option => this._supportedOptions.indexOf(option) !== -1);
-  };
+  }
 
-  sendQueries = (requests) => {
+  sendQueries(requests) {
     if (requests.length > 1 && !this._isBatchQueriesDisabled()) {
       return queriesBatch(requests, this._fetchWithMiddleware);
     }
 
     return queries(requests, this._fetchWithMiddleware);
-  };
+  }
 
-  sendMutation = (request) => {
+  sendMutation(request) {
     return mutation(request, this._fetchWithMiddleware);
-  };
+  }
 
-  _fetchWithMiddleware = (req) => {
+  _fetchWithMiddleware(req) {
     return fetchWrapper(req, this._middlewares);
-  };
+  }
 
-  _isBatchQueriesDisabled = () => {
+  _isBatchQueriesDisabled() {
     return this._options && this._options.disableBatchQuery;
-  };
+  }
 }
