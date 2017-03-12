@@ -37,26 +37,26 @@ export default function gqErrorsMiddleware(opts = {}) {
     });
   }
 
-  return next => req => {
-    const query = `${req.relayReqType} ${req.relayReqId}`;
+  return next =>
+    req => {
+      const query = `${req.relayReqType} ${req.relayReqId}`;
 
-    return next(req).then(res => {
-      if (res.json) {
-        if (Array.isArray(res.json)) {
-          res.json.forEach(batchItem => {
-            if (batchItem.payload.errors) {
-              displayErrors(batchItem.payload.errors, { query, req, res });
-            }
-          });
-        } else if (res.json.errors) {
-          displayErrors(res.json.errors, { query, req, res });
+      return next(req).then(res => {
+        if (res.json) {
+          if (Array.isArray(res.json)) {
+            res.json.forEach(batchItem => {
+              if (batchItem.payload.errors) {
+                displayErrors(batchItem.payload.errors, { query, req, res });
+              }
+            });
+          } else if (res.json.errors) {
+            displayErrors(res.json.errors, { query, req, res });
+          }
         }
-      }
-      return res;
-    });
-  };
+        return res;
+      });
+    };
 }
-
 
 function noticeAbsentStack() {
   return `

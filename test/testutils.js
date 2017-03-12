@@ -1,9 +1,11 @@
-/* eslint-disable import/prefer-default-export */
+/* eslint-disable import/prefer-default-export, no-param-reassign */
 
-export const mockReq = (reqid) => {
+export const mockReq = reqid => {
+  if (!reqid) reqid = Math.random();
+
   return {
     getID() {
-      return reqid || 'reqid';
+      return reqid;
     },
     getQueryString() {
       return '{}';
@@ -15,10 +17,10 @@ export const mockReq = (reqid) => {
       return {};
     },
     reject(err) {
-      return Promise.reject(err);
+      return err;
     },
     resolve(resp) {
-      return Promise.resolve(resp);
+      return resp;
     },
   };
 };

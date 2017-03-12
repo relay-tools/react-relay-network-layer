@@ -1,7 +1,7 @@
 /* eslint-disable no-param-reassign */
 
 export default function fetchWrapper(reqFromRelay, middlewares) {
-  const fetchAfterAllWrappers = (req) => {
+  const fetchAfterAllWrappers = req => {
     let { url, ...opts } = req;
 
     if (!url) {
@@ -12,10 +12,10 @@ export default function fetchWrapper(reqFromRelay, middlewares) {
       }
     }
 
-    return fetch(url, opts)
-      .then(res =>
-        // sub-promise for combining `res` with parsed json
-        res.json()
+    return fetch(url, opts).then(res => {
+      // sub-promise for combining `res` with parsed json
+      return res
+        .json()
         .then(json => {
           res.json = json;
           return res;
@@ -24,8 +24,8 @@ export default function fetchWrapper(reqFromRelay, middlewares) {
           console.warn('error parsing response json', e); // eslint-disable-line no-console
           res.json = {};
           return res;
-        }),
-      );
+        });
+    });
   };
 
   const wrappedFetch = compose(...middlewares)(fetchAfterAllWrappers);
@@ -34,7 +34,6 @@ export default function fetchWrapper(reqFromRelay, middlewares) {
     .then(throwOnServerError)
     .then(res => res.json);
 }
-
 
 /**
  * Composes single-argument functions from right to left. The rightmost
@@ -52,7 +51,8 @@ function compose(...funcs) {
   } else {
     const last = funcs[funcs.length - 1];
     const rest = funcs.slice(0, -1);
-    return (...args) => rest.reduceRight((composed, f) => f(composed), last(...args));
+    return (...args) =>
+      rest.reduceRight((composed, f) => f(composed), last(...args));
   }
 }
 

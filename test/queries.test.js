@@ -7,13 +7,21 @@ describe('Queries tests', () => {
   const middlewares = [];
   const rnl = new RelayNetworkLayer(middlewares);
 
-  afterEach(() => {
+  beforeEach(() => {
     fetchMock.restore();
   });
 
   it('should make a successfull query', () => {
-    fetchMock.post('/graphql', { data: {} });
-    assert.isFulfilled(rnl.sendQueries([mockReq()]));
+    fetchMock.mock({
+      matcher: '/graphql',
+      response: {
+        status: 200,
+        body: { data: {} },
+        sendAsJson: true,
+      },
+      method: 'POST',
+    });
+    return assert.isFulfilled(rnl.sendQueries([mockReq()]));
   });
 
   it('should fail correctly on network failure', () => {
@@ -24,7 +32,10 @@ describe('Queries tests', () => {
       },
       method: 'POST',
     });
-    assert.isRejected(rnl.sendQueries([mockReq()]), /Network connection error/);
+    return assert.isRejected(
+      rnl.sendQueries([mockReq()]),
+      /Network connection error/
+    );
   });
 
   it('should handle error response', () => {
@@ -33,19 +44,17 @@ describe('Queries tests', () => {
       response: {
         status: 200,
         body: {
-          errors: [
-            { location: 1, message: 'major error' },
-          ],
+          errors: [{ location: 1, message: 'major error' }],
         },
       },
       method: 'POST',
     });
 
     const req1 = mockReq(1);
-    req1.reject = (err) => {
+    req1.reject = err => {
       assert(err instanceof Error, 'should be an error');
     };
 
-    return rnl.sendQueries([req1]);
+    return assert.isRejected(rnl.sendQueries([req1]));
   });
 });

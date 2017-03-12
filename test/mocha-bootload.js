@@ -4,7 +4,8 @@ var chai = require('chai');
 var chaiAsPromised = require('chai-as-promised');
 chai.use(chaiAsPromised);
 
-process.on('unhandledRejection', function (error) {
+process.on('unhandledRejection', function(error) {
   console.error('Unhandled Promise Rejection:');
-  console.error(error && error.stack || error);
+  console.error((error && error.stack) || error);
+  exit(1);
 });

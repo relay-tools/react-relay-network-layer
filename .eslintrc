@@ -1,5 +1,11 @@
 {
-  "extends": "airbnb-base",
+  "extends": [
+    "airbnb-base",
+    "prettier"
+  ],
+  "plugins": [
+    "prettier"
+  ],
   "parser": "babel-eslint",
   "rules": {
     "no-underscore-dangle": 0,
@@ -14,6 +20,11 @@
       "imports": "always-multiline",
       "exports": "always-multiline",
       "functions": "ignore",
+    }],
+    "prettier/prettier": ["error", {
+      "trailingComma": "es5",
+      "singleQuote": true,
+      "printWidth": 80
     }],
     "no-plusplus": 0
   },

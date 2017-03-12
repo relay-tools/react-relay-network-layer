@@ -12,8 +12,7 @@
               "defaults"
             ]
           },
-          "include": ["transform-es2015-classes"],
-          "debug": true,
+          "include": ["transform-es2015-classes"]
         }]
       ]
     },
@@ -24,8 +23,7 @@
             "chrome": 52
           },
           "loose": true,
-          "modules": false,
-          "debug": true
+          "modules": false
         }]
       ]
     }
