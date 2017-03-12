@@ -32,6 +32,7 @@ Relay.injectNetworkLayer(new RelayNetworkLayer([
 - ], { disableBatchQuery: false }));
 + ]));
 ```
+Previous documentation for version 1.x.x can be found [here](https://github.com/nodkz/react-relay-network-layer/blob/6eb361668cd81b760a8c99e8265f10416d802dd3/README.md).
 
 ### Available middlewares:
 - **your custom inline middleware** - [see example](https://github.com/nodkz/react-relay-network-layer#example-of-injecting-networklayer-with-middlewares-on-the-client-side) below where added `credentials` and `headers` to the `fetch` method.
