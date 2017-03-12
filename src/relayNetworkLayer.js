@@ -1,13 +1,13 @@
-import queries from './relay/queries';
-import queriesBatch from './relay/queriesBatch';
-import mutation from './relay/mutation';
+import queries from './relayQueries';
+import mutation from './relayMutation';
 import fetchWrapper from './fetchWrapper';
-
 
 export default class RelayNetworkLayer {
   constructor(middlewares, options) {
     this._options = options;
-    this._middlewares = Array.isArray(middlewares) ? middlewares : [middlewares];
+    this._middlewares = Array.isArray(middlewares)
+      ? middlewares
+      : [middlewares];
     this._supportedOptions = [];
 
     this._middlewares.forEach(mw => {
@@ -23,31 +23,19 @@ export default class RelayNetworkLayer {
     this.supports = this.supports.bind(this);
     this.sendQueries = this.sendQueries.bind(this);
     this.sendMutation = this.sendMutation.bind(this);
-    this._fetchWithMiddleware = this._fetchWithMiddleware.bind(this);
-    this._isBatchQueriesDisabled = this._isBatchQueriesDisabled.bind(this);
   }
 
   supports(...options) {
-    return options.every(option => this._supportedOptions.indexOf(option) !== -1);
+    return options.every(
+      option => this._supportedOptions.indexOf(option) !== -1
+    );
   }
 
   sendQueries(requests) {
-    if (requests.length > 1 && !this._isBatchQueriesDisabled()) {
-      return queriesBatch(requests, this._fetchWithMiddleware);
-    }
-
-    return queries(requests, this._fetchWithMiddleware);
+    return queries(requests, req => fetchWrapper(req, this._middlewares));
   }
 
   sendMutation(request) {
-    return mutation(request, this._fetchWithMiddleware);
-  }
-
-  _fetchWithMiddleware(req) {
-    return fetchWrapper(req, this._middlewares);
-  }
-
-  _isBatchQueriesDisabled() {
-    return this._options && this._options.disableBatchQuery;
+    return mutation(request, req => fetchWrapper(req, this._middlewares));
   }
 }
