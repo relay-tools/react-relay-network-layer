@@ -2,10 +2,24 @@
 
 import { isFunction } from '../utils';
 
+// Max out at roughly 100kb (express-graphql imposed max)
+const DEFAULT_BATCH_SIZE = 102400;
+
+function copyBatchResponse(batchResponse, res) {
+  // Supports graphql-js, graphql-graphene and apollo-server responses
+  const json = res.payload ? res.payload : res;
+  return {
+    ok: batchResponse.ok,
+    status: batchResponse.status,
+    json,
+  };
+}
+
 export default function batchMiddleware(opts = {}) {
   const batchTimeout = opts.batchTimeout || 0; // 0 is the same as nextTick in nodeJS
   const allowMutations = opts.allowMutations || false;
   const batchUrl = opts.batchUrl || '/graphql/batch';
+  const maxBatchSize = opts.maxBatchSize || DEFAULT_BATCH_SIZE;
   const singleton = {};
 
   return next =>
@@ -18,6 +32,7 @@ export default function batchMiddleware(opts = {}) {
         batchTimeout,
         batchUrl,
         singleton,
+        maxBatchSize,
       });
     };
 }
@@ -29,10 +44,12 @@ function passThroughBatch(req, next, opts) {
     singleton.batcher = prepareNewBatcher(next, opts);
   }
 
-  // here we can check batcher body size
-  // and if needed splitting - create new batcher:
-  //   singleton.batcher = prepareNewBatcher(next, opts);
-  singleton.batcher.bodySize += req.body.length;
+  if (singleton.batcher.bodySize + req.body.length + 1 > opts.maxBatchSize) {
+    singleton.batcher = prepareNewBatcher(next, opts);
+  }
+
+  // +1 accounts for tailing comma after joining
+  singleton.batcher.bodySize += req.body.length + 1;
 
   // queue request
   return new Promise((resolve, reject) => {
@@ -42,7 +59,7 @@ function passThroughBatch(req, next, opts) {
 
 function prepareNewBatcher(next, opts) {
   const batcher = {
-    bodySize: 0,
+    bodySize: 2, // account for '[]'
     requestMap: {},
     acceptRequests: true,
   };
@@ -110,16 +127,9 @@ function sendRequests(requestMap, next, opts) {
           if (!res) return;
           const request = requestMap[res.id];
           if (request) {
-            if (res.payload) {
-              request.done = true;
-              request.resolve(
-                Object.assign({}, batchResponse, { json: res.payload })
-              );
-              return;
-            }
-            // compatibility with graphene-django and apollo-server batch format
+            const responsePayload = copyBatchResponse(batchResponse, res);
             request.done = true;
-            request.resolve(Object.assign({}, batchResponse, { json: res }));
+            request.resolve(responsePayload);
           }
         });
       })

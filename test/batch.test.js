@@ -1,7 +1,7 @@
 import { assert } from 'chai';
 import fetchMock from 'fetch-mock';
 import { RelayNetworkLayer, batchMiddleware } from '../src';
-import { mockReq } from './testutils';
+import { mockReq, mockReqWithSize } from './testutils';
 
 describe('Batch tests', () => {
   const rnl = new RelayNetworkLayer([batchMiddleware()]);
@@ -188,6 +188,56 @@ describe('Batch tests', () => {
           );
         });
       });
+    });
+  });
+
+  describe('option `maxBatchSize`', () => {
+    const rnl3 = new RelayNetworkLayer([
+      batchMiddleware({ maxBatchSize: 1024 * 10 }),
+    ]);
+
+    beforeEach(() => {
+      fetchMock.restore();
+    });
+
+    it('should split large batched requests into multiple requests', () => {
+      fetchMock.mock({
+        matcher: '/graphql',
+        response: {
+          status: 200,
+          body: { id: 5, data: {} },
+        },
+        method: 'POST',
+      });
+
+      fetchMock.mock({
+        matcher: '/graphql/batch',
+        response: {
+          status: 200,
+          body: [
+            { id: 1, data: {} },
+            { id: 2, data: {} },
+            { id: 3, data: {} },
+            { id: 4, data: {} },
+          ],
+        },
+        method: 'POST',
+      });
+
+      const req1 = mockReqWithSize(1, 1024 * 7);
+      const req2 = mockReqWithSize(2, 1024 * 2);
+      const req3 = mockReqWithSize(3, 1024 * 5);
+      const req4 = mockReqWithSize(4, 1024 * 4);
+      const req5 = mockReqWithSize(5, 1024 * 11);
+
+      return assert
+        .isFulfilled(rnl3.sendQueries([req1, req2, req3, req4, req5]))
+        .then(() => {
+          const batchReqs = fetchMock.calls('/graphql/batch');
+          const singleReqs = fetchMock.calls('/graphql');
+          assert.equal(batchReqs.length, 2);
+          assert.equal(singleReqs.length, 1);
+        });
     });
   });
 });

@@ -43,6 +43,7 @@ Previous documentation for version 1.x.x can be found [here](https://github.com/
   - `batchUrl` - string or function(requestMap). Url of the server endpoint for batch request execution (default: `/graphql/batch`)
   - `batchTimeout` - integer in milliseconds, period of time for gathering multiple requests before sending them to the server (default: `0`)
   - `allowMutations` - by default batching disabled for mutations, you may enable it passing `true` (default: `false`)
+  - `maxBatchSize` - integer representing maximum size of request to be sent in a single batch. Once a request hits the provided size in length a new batch request is ran. (default: 102400 (roughly 100kb))
 - **retryMiddleware** - for request retry if the initial request fails.
   - `fetchTimeout` - number in milliseconds that defines in how much time will request timeout after it has been sent to the server (default: `15000`).
   - `retryDelays` - array of millisecond that defines the values on which retries are based on (default: `[1000, 3000]`).
