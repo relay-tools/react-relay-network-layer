@@ -1,5 +1,5 @@
-ReactRelayNetworkLayer
-======================
+ReactRelayNetworkLayer 2
+========================
 [![](https://img.shields.io/npm/v/react-relay-network-layer.svg)](https://www.npmjs.com/package/react-relay-network-layer)
 [![npm](https://img.shields.io/npm/dt/react-relay-network-layer.svg)](http://www.npmtrends.com/react-relay-network-layer)
 [![Travis](https://img.shields.io/travis/nodkz/react-relay-network-layer.svg?maxAge=2592000)](https://travis-ci.org/nodkz/react-relay-network-layer)
@@ -11,8 +11,19 @@ with various middlewares which can manipulate requests/responses on the fly (cha
 
 `ReactRelayNetworkLayer` can be used in browser, react-native or node server for rendering. Under the hood this module uses global `fetch` method. So if your client is too old, please import explicitly proper polyfill to your code (eg. `whatwg-fetch`, `node-fetch` or `fetch-everywhere`).
 
+```
+yarn add react-relay-network-layer
+OR
+npm install react-relay-network-layer --save
+```
+
 ### Migrating from v1 to v2
-In v2 was completely rewritten batch logic as middleware. All other parts stay unaffected. So if you use request batching, you should change your config:
+Changes in v2.0.0:
+- completely rewritten batch logic as middleware, added additional cool options to it `batchTimeout`, `maxBatchSize`
+- throw Error object on non-200 response (before thrown response)
+- much more tests
+
+All other parts stay unaffected. So if you use `request batching`, you should change your config:
 ```diff
 import Relay from 'react-relay';
 import {
@@ -32,18 +43,24 @@ Relay.injectNetworkLayer(new RelayNetworkLayer([
 - ], { disableBatchQuery: false }));
 + ]));
 ```
+
+Big thanks to @brad-decker and @jeanregisser in helping to done this release.
+
 Previous documentation for version 1.x.x can be found [here](https://github.com/nodkz/react-relay-network-layer/blob/6eb361668cd81b760a8c99e8265f10416d802dd3/README.md).
+
+Middlewares
+===========
 
 ### Available middlewares:
 - **your custom inline middleware** - [see example](https://github.com/nodkz/react-relay-network-layer#example-of-injecting-networklayer-with-middlewares-on-the-client-side) below where added `credentials` and `headers` to the `fetch` method.
   - `next => req => { /* your modification of 'req' object */ return next(req); }`
 - **urlMiddleware** - for manipulating fetch `url` on fly via thunk.
   - `url` - string or function(req) for single request (default: `/graphql`)  
-- **batchMiddleware** - gather some period of time relay-requests and sends it as one http-request
+- **batchMiddleware** - gather some period of time relay-requests and sends it as one http-request. You server must support batch request, [how to setup your server](https://github.com/nodkz/react-relay-network-layer#example-how-to-enable-batching)
   - `batchUrl` - string or function(requestMap). Url of the server endpoint for batch request execution (default: `/graphql/batch`)
-  - `batchTimeout` - integer in milliseconds, period of time for gathering multiple requests before sending them to the server (default: `0`)
+  - `batchTimeout` - integer in milliseconds, period of time for gathering multiple requests before sending them to the server. Will delay sending of the requests on specified in this option period of time, so be careful and keep this value small. (default: `0`)
+  - `maxBatchSize` - integer representing maximum size of request to be sent in a single batch. Once a request hits the provided size in length a new batch request is ran. Actual for hardcoded limit in 100kb per request in [express-graphql](https://github.com/graphql/express-graphql/blob/master/src/parseBody.js#L112) module. (default: `102400` characters, roughly 100kb for 1-byte characters or 200kb for 2-byte characters)
   - `allowMutations` - by default batching disabled for mutations, you may enable it passing `true` (default: `false`)
-  - `maxBatchSize` - integer representing maximum size of request to be sent in a single batch. Once a request hits the provided size in length a new batch request is ran. (default: `102400` characters, roughly 100kb for 1-byte characters or 200kb for 2-byte characters)
 - **retryMiddleware** - for request retry if the initial request fails.
   - `fetchTimeout` - number in milliseconds that defines in how much time will request timeout after it has been sent to the server (default: `15000`).
   - `retryDelays` - array of millisecond that defines the values on which retries are based on (default: `[1000, 3000]`).
@@ -68,19 +85,6 @@ Previous documentation for version 1.x.x can be found [here](https://github.com/
   - `prefix` - prefix message (default: `[RELAY-NETWORK] GRAPHQL SERVER ERROR:`)
 - **deferMiddleware** - _experimental_ Right now `deferMiddleware()` just set `defer` as supported option for Relay. So this middleware allow to community play with `defer()` in cases, which was [described by @wincent](https://github.com/facebook/relay/issues/288#issuecomment-199510058).
 
-[CHANGELOG](https://github.com/nodkz/react-relay-network-layer/blob/master/CHANGELOG.md)
-
-Installation
-============
-
-```
-yarn add react-relay-network-layer
-OR
-npm install react-relay-network-layer --save
-```
-
-Middlewares
-===========
 ### Example of injecting NetworkLayer with middlewares on the **client side**.
 ```js
 import Relay from 'react-relay';
@@ -260,6 +264,8 @@ Contribute
 ==========
 I actively welcome pull requests with code and doc fixes.
 Also if you made great middleware and want share it within this module, please feel free to open PR.
+
+[CHANGELOG](https://github.com/nodkz/react-relay-network-layer/blob/master/CHANGELOG.md)
 
 
 License
