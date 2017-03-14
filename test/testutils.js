@@ -1,14 +1,17 @@
 /* eslint-disable import/prefer-default-export, no-param-reassign */
 
-export const mockReq = reqid => {
+export const mockReq = (reqid, { query, files } = {}) => {
   if (!reqid) reqid = Math.random();
+
+  let error;
+  let payload;
 
   return {
     getID() {
       return reqid;
     },
     getQueryString() {
-      return '{}';
+      return query || '{}';
     },
     getDebugName() {
       return `debugname${reqid}`;
@@ -16,36 +19,28 @@ export const mockReq = reqid => {
     getVariables() {
       return {};
     },
+    getFiles() {
+      return files;
+    },
     reject(err) {
-      return err;
+      error = err;
     },
     resolve(resp) {
-      return resp;
+      payload = resp;
+    },
+    get error() {
+      return error;
+    },
+    get payload() {
+      return payload;
     },
   };
 };
 
 export const mockReqWithSize = (reqid, size) => {
-  if (!reqid) reqid = Math.random();
+  return mockReq(reqid, { query: `{${'x'.repeat(size)}}` });
+};
 
-  return {
-    getID() {
-      return reqid;
-    },
-    getQueryString() {
-      return `{${Array(size).join('x')}}`;
-    },
-    getDebugName() {
-      return `debugname${reqid}`;
-    },
-    getVariables() {
-      return {};
-    },
-    reject(err) {
-      return err;
-    },
-    resolve(resp) {
-      return resp;
-    },
-  };
+export const mockReqWithFiles = reqid => {
+  return mockReq(reqid, { files: { file1: 'data', file2: 'data' } });
 };

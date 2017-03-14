@@ -1,9 +1,12 @@
 import { assert } from 'chai';
 import fetchMock from 'fetch-mock';
+import FormData from 'form-data';
 import { RelayNetworkLayer, batchMiddleware } from '../src';
-import { mockReq, mockReqWithSize } from './testutils';
+import { mockReq, mockReqWithSize, mockReqWithFiles } from './testutils';
 
-describe('Batch tests', () => {
+global.FormData = FormData;
+
+describe('batchMiddleware', () => {
   const rnl = new RelayNetworkLayer([batchMiddleware()]);
 
   beforeEach(() => {
@@ -39,18 +42,18 @@ describe('Batch tests', () => {
     });
 
     const req1 = mockReq(1);
-    req1.reject = err => {
-      assert(err instanceof Error);
-      assert(/Server does not return response for request/.test(err.message));
-    };
     const req2 = mockReq(2);
-    req2.reject = err => {
-      assert(err instanceof Error);
-      assert(/Server does not return response for request/.test(err.message));
-    };
-    return assert.isRejected(
-      rnl.sendQueries([req1, req2]),
-      /Server does not return response for request/
+    return assert.isFulfilled(
+      rnl.sendQueries([req1, req2]).then(() => {
+        assert(req1.error instanceof Error);
+        assert(
+          /Server does not return response for request/.test(req1.error.message)
+        );
+        assert(req2.error instanceof Error);
+        assert(
+          /Server does not return response for request/.test(req2.error.message)
+        );
+      })
     );
   });
 
@@ -62,13 +65,17 @@ describe('Batch tests', () => {
       },
       method: 'POST',
     });
-    return assert.isRejected(
-      rnl.sendQueries([mockReq(), mockReq()]),
-      /Network connection error/
-    );
+    const req1 = mockReq(1);
+    const req2 = mockReq(2);
+    return assert.isFulfilled(rnl.sendQueries([req1, req2])).then(() => {
+      assert(req1.error instanceof Error);
+      assert(/Network connection error/.test(req1.error.message));
+      assert(req2.error instanceof Error);
+      assert(/Network connection error/.test(req2.error.message));
+    });
   });
 
-  it('should handle server errors', () => {
+  it('should handle server errors for one request', () => {
     fetchMock.mock({
       matcher: '/graphql/batch',
       response: {
@@ -87,11 +94,33 @@ describe('Batch tests', () => {
     });
 
     const req1 = mockReq(1);
-    req1.reject = err => {
-      assert(err instanceof Error, 'should be an error');
-    };
     const req2 = mockReq(2);
-    return assert.isRejected(rnl.sendQueries([req1, req2]));
+    return assert.isFulfilled(rnl.sendQueries([req1, req2])).then(() => {
+      assert(req1.error instanceof Error, 'should be an error');
+      assert(!req2.error);
+    });
+  });
+
+  it('should handle server errors for all requests', () => {
+    fetchMock.mock({
+      matcher: '/graphql/batch',
+      response: {
+        status: 200,
+        body: {
+          errors: [{ location: 1, message: 'major error' }],
+        },
+      },
+      method: 'POST',
+    });
+
+    const req1 = mockReq(1);
+    const req2 = mockReq(2);
+    const req3 = mockReq(3);
+    return assert.isFulfilled(rnl.sendQueries([req1, req2, req3])).then(() => {
+      assert(req1.error instanceof Error, 'should be an error');
+      assert(req2.error instanceof Error, 'should be an error');
+      assert(req3.error instanceof Error, 'should be an error');
+    });
   });
 
   it('should handle responces without payload wrapper', () => {
@@ -111,11 +140,11 @@ describe('Batch tests', () => {
     });
 
     const req1 = mockReq(1);
-    req1.reject = err => {
-      assert(err instanceof Error, 'should be an error');
-    };
     const req2 = mockReq(2);
-    return assert.isRejected(rnl.sendQueries([req1, req2]));
+    return assert.isFulfilled(rnl.sendQueries([req1, req2])).then(() => {
+      assert(req1.error instanceof Error, 'should be an error');
+      assert(!req2.error);
+    });
   });
 
   describe('option `batchTimeout`', () => {
@@ -237,6 +266,88 @@ describe('Batch tests', () => {
           const singleReqs = fetchMock.calls('/graphql');
           assert.equal(batchReqs.length, 2);
           assert.equal(singleReqs.length, 1);
+        });
+    });
+  });
+
+  describe('option `allowMutations`', () => {
+    beforeEach(() => {
+      fetchMock.restore();
+    });
+
+    it('should not batch mutations by default', () => {
+      const rnlTimeout20 = new RelayNetworkLayer([
+        batchMiddleware({ batchTimeout: 20 }),
+      ]);
+
+      fetchMock.mock({
+        matcher: '/graphql',
+        response: {
+          status: 200,
+          body: { id: 1, data: {} },
+        },
+        method: 'POST',
+      });
+
+      const req1 = mockReqWithFiles(1);
+      rnlTimeout20.sendMutation(req1);
+      const req2 = mockReqWithFiles(1);
+
+      return assert.isFulfilled(rnlTimeout20.sendMutation(req2)).then(() => {
+        const singleReqs = fetchMock.calls('/graphql');
+        assert.equal(singleReqs.length, 2);
+      });
+    });
+
+    it('should batch mutations if `allowMutations=true`', () => {
+      const rnlAllowMutations = new RelayNetworkLayer([
+        batchMiddleware({ batchTimeout: 20, allowMutations: true }),
+      ]);
+
+      fetchMock.mock({
+        matcher: '/graphql/batch',
+        response: {
+          status: 200,
+          body: [{ id: 1, data: {} }, { id: 2, data: {} }],
+        },
+        method: 'POST',
+      });
+
+      const req1 = mockReq(1);
+      rnlAllowMutations.sendMutation(req1);
+      const req2 = mockReq(2);
+
+      return assert
+        .isFulfilled(rnlAllowMutations.sendMutation(req2))
+        .then(() => {
+          const batchReqs = fetchMock.calls('/graphql/batch');
+          assert.equal(batchReqs.length, 1);
+        });
+    });
+
+    it('should not batch mutations with files if `allowMutations=true`', () => {
+      const rnlAllowMutations = new RelayNetworkLayer([
+        batchMiddleware({ batchTimeout: 20, allowMutations: true }),
+      ]);
+
+      fetchMock.mock({
+        matcher: '/graphql',
+        response: {
+          status: 200,
+          body: { id: 1, data: {} },
+        },
+        method: 'POST',
+      });
+
+      const req1 = mockReqWithFiles(1);
+      rnlAllowMutations.sendMutation(req1);
+      const req2 = mockReqWithFiles(1);
+
+      return assert
+        .isFulfilled(rnlAllowMutations.sendMutation(req2))
+        .then(() => {
+          const singleReqs = fetchMock.calls('/graphql');
+          assert.equal(singleReqs.length, 2);
         });
     });
   });
