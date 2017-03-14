@@ -1,56 +1,41 @@
 /* eslint-disable no-param-reassign, no-use-before-define, prefer-template */
 
-import formatRequestErrors from './formatRequestErrors';
-
 export default function mutation(relayRequest, fetchWithMiddleware) {
   const req = {
     method: 'POST',
-    relayReqId: Date.now(),
+    relayReqId: relayRequest.getID
+      ? relayRequest.getID()
+      : `mutation${Math.random()}`,
     relayReqObj: relayRequest,
     relayReqType: 'mutation',
   };
 
-  if (_hasFiles(relayRequest)) {
-    Object.assign(req, _mutationWithFiles(relayRequest));
+  if (hasFiles(relayRequest)) {
+    mutationWithFiles(req, relayRequest);
   } else {
-    Object.assign(req, _mutation(relayRequest));
+    mutationWithoutFiles(req, relayRequest);
   }
 
   return fetchWithMiddleware(req)
-    .then(payload => {
-      if ({}.hasOwnProperty.call(payload, 'errors')) {
-        const error = new Error(
-          'Server request for mutation `' +
-            relayRequest.getDebugName() +
-            '` ' +
-            'failed for the following reasons:\n\n' +
-            formatRequestErrors(relayRequest, payload.errors)
-        );
-        error.source = payload;
-        relayRequest.reject(error);
-      } else {
-        relayRequest.resolve({ response: payload.data });
-      }
-    })
-    .catch(error => relayRequest.reject(error));
+    .then(data => relayRequest.resolve({ response: data }))
+    .catch(err => relayRequest.reject(err));
 }
 
-function _hasFiles(relayRequest) {
+function hasFiles(relayRequest) {
   return !!(relayRequest.getFiles && relayRequest.getFiles());
 }
 
-function _mutationWithFiles(relayRequest) {
-  const req = {
-    headers: {},
-  };
+function mutationWithFiles(req, relayRequest) {
+  req.headers = {};
 
-  if (_hasFiles(relayRequest)) {
+  if (hasFiles(relayRequest)) {
     const files = relayRequest.getFiles();
 
     if (!global.FormData) {
       throw new Error('Uploading files without `FormData` not supported.');
     }
     const formData = new FormData();
+    formData.append('id', req.relayReqId);
     formData.append('query', relayRequest.getQueryString());
     formData.append('variables', JSON.stringify(relayRequest.getVariables()));
     Object.keys(files).forEach(filename => {
@@ -64,22 +49,17 @@ function _mutationWithFiles(relayRequest) {
     });
     req.body = formData;
   }
-
-  return req;
 }
 
-function _mutation(relayRequest) {
-  const req = {
-    headers: {
-      Accept: '*/*',
-      'Content-Type': 'application/json',
-    },
+function mutationWithoutFiles(req, relayRequest) {
+  req.headers = {
+    Accept: '*/*',
+    'Content-Type': 'application/json',
   };
 
   req.body = JSON.stringify({
+    id: req.relayReqId,
     query: relayRequest.getQueryString(),
     variables: relayRequest.getVariables(),
   });
-
-  return req;
 }

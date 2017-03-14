@@ -1,6 +1,6 @@
 import queries from './relayQueries';
 import mutation from './relayMutation';
-import fetchWrapper from './fetchWrapper';
+import fetchWithMiddleware from './fetchWithMiddleware';
 
 export default class RelayNetworkLayer {
   constructor(middlewares, options) {
@@ -32,10 +32,12 @@ export default class RelayNetworkLayer {
   }
 
   sendQueries(requests) {
-    return queries(requests, req => fetchWrapper(req, this._middlewares));
+    return queries(requests, req =>
+      fetchWithMiddleware(req, this._middlewares));
   }
 
   sendMutation(request) {
-    return mutation(request, req => fetchWrapper(req, this._middlewares));
+    return mutation(request, req =>
+      fetchWithMiddleware(req, this._middlewares));
   }
 }

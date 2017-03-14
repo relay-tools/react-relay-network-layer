@@ -1,6 +1,8 @@
 /* eslint-disable no-param-reassign */
 
-export default function fetchWrapper(reqFromRelay, middlewares) {
+import createRequestError from './createRequestError';
+
+export default function fetchWithMiddleware(reqFromRelay, middlewares) {
   const fetchAfterAllWrappers = req => {
     let { url, ...opts } = req;
 
@@ -12,27 +14,46 @@ export default function fetchWrapper(reqFromRelay, middlewares) {
       }
     }
 
-    return fetch(url, opts).then(res => {
-      // sub-promise for combining `res` with parsed json
-      return res
-        .json()
-        .then(json => {
+    return fetch(url, opts)
+      .then(res => {
+        if (res.status >= 200 && res.status < 300) {
+          return res;
+        }
+        return res.text().then(text => {
+          const err = new Error(text);
+          err.fetchResponse = res;
+          throw err;
+        });
+      })
+      .then(res => {
+        // sub-promise for combining `res` with parsed json
+        return res.json().then(json => {
           res.json = json;
           return res;
-        })
-        .catch(e => {
-          console.warn('error parsing response json', e); // eslint-disable-line no-console
-          res.json = {};
-          return res;
         });
-    });
+      });
   };
 
   const wrappedFetch = compose(...middlewares)(fetchAfterAllWrappers);
 
-  return wrappedFetch(reqFromRelay)
-    .then(throwOnServerError)
-    .then(res => res.json);
+  return wrappedFetch(reqFromRelay).then(res => {
+    const payload = res.json;
+    if ({}.hasOwnProperty.call(payload, 'errors')) {
+      throw createRequestError(
+        reqFromRelay.relayReqObj,
+        reqFromRelay.relayReqType,
+        '200',
+        payload
+      );
+    } else if (!{}.hasOwnProperty.call(payload, 'data')) {
+      throw new Error(
+        'Server response.data was missing for query `' +
+          reqFromRelay.relayReqObj.getDebugName() +
+          '`.'
+      );
+    }
+    return payload.data;
+  });
 }
 
 /**
@@ -54,12 +75,4 @@ function compose(...funcs) {
     return (...args) =>
       rest.reduceRight((composed, f) => f(composed), last(...args));
   }
-}
-
-function throwOnServerError(response) {
-  if (response.status >= 200 && response.status < 300) {
-    return response;
-  }
-
-  throw response;
 }

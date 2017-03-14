@@ -5,16 +5,6 @@ import { isFunction } from '../utils';
 // Max out at roughly 100kb (express-graphql imposed max)
 const DEFAULT_BATCH_SIZE = 102400;
 
-function copyBatchResponse(batchResponse, res) {
-  // Supports graphql-js, graphql-graphene and apollo-server responses
-  const json = res.payload ? res.payload : res;
-  return {
-    ok: batchResponse.ok,
-    status: batchResponse.status,
-    json,
-  };
-}
-
 export default function batchMiddleware(opts = {}) {
   const batchTimeout = opts.batchTimeout || 0; // 0 is the same as nextTick in nodeJS
   const allowMutations = opts.allowMutations || false;
@@ -24,7 +14,12 @@ export default function batchMiddleware(opts = {}) {
 
   return next =>
     req => {
-      if (req.relayReqType === 'mutation' && !allowMutations) {
+      // never batch mutations with files
+      // mutation without files can be batched if allowMutations = true
+      if (
+        req.relayReqType === 'mutation' &&
+        (!allowMutations || (global.FormData && req.body instanceof FormData))
+      ) {
         return next(req);
       }
 
@@ -53,7 +48,17 @@ function passThroughBatch(req, next, opts) {
 
   // queue request
   return new Promise((resolve, reject) => {
-    singleton.batcher.requestMap[req.relayReqId] = { req, resolve, reject };
+    singleton.batcher.requestMap[req.relayReqId] = {
+      req,
+      completeOk: res => {
+        req.done = true;
+        resolve(res);
+      },
+      completeErr: err => {
+        req.done = true;
+        reject(err);
+      },
+    };
   });
 }
 
@@ -67,19 +72,9 @@ function prepareNewBatcher(next, opts) {
   setTimeout(
     () => {
       batcher.acceptRequests = false;
-      sendRequests(batcher.requestMap, next, opts).then(() => {
-        // check that server returns responses for all requests
-        Object.keys(batcher.requestMap).forEach(id => {
-          if (!batcher.requestMap[id].done) {
-            batcher.requestMap[id].reject(
-              new Error(
-                `Server does not return response for request with id ${id} \n` +
-                  `eg. { "id": "${id}", "data": {} }`
-              )
-            );
-          }
-        });
-      });
+      sendRequests(batcher.requestMap, next, opts)
+        .then(() => finalizeUncompleted(batcher))
+        .catch(() => finalizeUncompleted(batcher));
     },
     opts.batchTimeout
   );
@@ -95,8 +90,7 @@ function sendRequests(requestMap, next, opts) {
     const request = requestMap[ids[0]];
 
     return next(request.req).then(res => {
-      request.done = true;
-      request.resolve(res);
+      request.completeOk(res);
     });
   } else if (ids.length > 1) {
     // SEND AS BATCHED QUERY
@@ -128,18 +122,43 @@ function sendRequests(requestMap, next, opts) {
           const request = requestMap[res.id];
           if (request) {
             const responsePayload = copyBatchResponse(batchResponse, res);
-            request.done = true;
-            request.resolve(responsePayload);
+            request.completeOk(responsePayload);
           }
         });
       })
       .catch(e => {
         ids.forEach(id => {
-          requestMap[id].done = true;
-          requestMap[id].reject(e);
+          requestMap[id].completeErr(e);
         });
       });
   }
 
   return Promise.resolve();
+}
+
+// check that server returns responses for all requests
+function finalizeUncompleted(batcher) {
+  Object.keys(batcher.requestMap).forEach(id => {
+    if (!batcher.requestMap[id].req.done) {
+      batcher.requestMap[id].completeErr(
+        new Error(
+          `Server does not return response for request with id ${id} \n` +
+            `eg. { "id": "${id}", "data": {} }`
+        )
+      );
+    }
+  });
+}
+
+function copyBatchResponse(batchResponse, res) {
+  // Fallback for graphql-graphene and apollo-server batch responses
+  const json = res.payload || res;
+  return {
+    ok: batchResponse.ok,
+    status: batchResponse.status,
+    statusText: batchResponse.statusText,
+    url: batchResponse.url,
+    headers: batchResponse.headers,
+    json,
+  };
 }

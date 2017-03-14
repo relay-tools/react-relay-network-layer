@@ -1,7 +1,7 @@
 ReactRelayNetworkLayer
 ======================
 [![](https://img.shields.io/npm/v/react-relay-network-layer.svg)](https://www.npmjs.com/package/react-relay-network-layer)
-[![npm](https://img.shields.io/npm/dt/react-relay-network-layer.svg)](https://www.npmjs.com/package/react-relay-network-layer)
+[![npm](https://img.shields.io/npm/dt/react-relay-network-layer.svg)](http://www.npmtrends.com/react-relay-network-layer)
 [![Travis](https://img.shields.io/travis/nodkz/react-relay-network-layer.svg?maxAge=2592000)](https://travis-ci.org/nodkz/react-relay-network-layer)
 [![Commitizen friendly](https://img.shields.io/badge/commitizen-friendly-brightgreen.svg)](http://commitizen.github.io/cz-cli/)
 [![semantic-release](https://img.shields.io/badge/%20%20%F0%9F%93%A6%F0%9F%9A%80-semantic--release-e10079.svg)](https://github.com/semantic-release/semantic-release)
@@ -43,7 +43,7 @@ Previous documentation for version 1.x.x can be found [here](https://github.com/
   - `batchUrl` - string or function(requestMap). Url of the server endpoint for batch request execution (default: `/graphql/batch`)
   - `batchTimeout` - integer in milliseconds, period of time for gathering multiple requests before sending them to the server (default: `0`)
   - `allowMutations` - by default batching disabled for mutations, you may enable it passing `true` (default: `false`)
-  - `maxBatchSize` - integer representing maximum size of request to be sent in a single batch. Once a request hits the provided size in length a new batch request is ran. (default: 102400 (roughly 100kb))
+  - `maxBatchSize` - integer representing maximum size of request to be sent in a single batch. Once a request hits the provided size in length a new batch request is ran. (default: `102400` characters, roughly 100kb for 1-byte characters or 200kb for 2-byte characters)
 - **retryMiddleware** - for request retry if the initial request fails.
   - `fetchTimeout` - number in milliseconds that defines in how much time will request timeout after it has been sent to the server (default: `15000`).
   - `retryDelays` - array of millisecond that defines the values on which retries are based on (default: `[1000, 3000]`).

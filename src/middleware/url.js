@@ -16,7 +16,9 @@ export default function urlMiddleware(opts = {}) {
         }
       }
 
-      req.url = isFunction(urlOrThunk) ? urlOrThunk(req) : urlOrThunk;
+      if (req.relayReqType !== 'batch-query') {
+        req.url = isFunction(urlOrThunk) ? urlOrThunk(req) : urlOrThunk;
+      }
 
       return next(req);
     };
