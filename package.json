@@ -76,7 +76,7 @@
     "build-es": "rimraf es && BABEL_ENV=es babel src -d es",
     "lint": "eslint src test *.js",
     "coverage": "nyc npm run test:all",
-    "test": "BABEL_ENV=lib mocha --require test/mocha-bootload --compilers js:babel-register test/*.test.js",
+    "test": "BABEL_ENV=lib mocha --require test/mocha-bootload --compilers js:babel-register test/*.test.js test/**/*.test.js",
     "test:all": "npm run lint && npm run test",
     "semantic-release": "semantic-release pre && npm publish && semantic-release post"
   }
