@@ -5,7 +5,7 @@ import { mockReq } from '../testutils';
 import urlMiddleware from '../../src/middleware/url';
 
 describe('Middleware / url', () => {
-  describe('url option as string', () => {
+  describe('`url` option as string', () => {
     const rnl = new RelayNetworkLayer([
       urlMiddleware({
         url: '/other/url',
@@ -28,7 +28,7 @@ describe('Middleware / url', () => {
 
     it('should work with query', () => {
       const req1 = mockReq();
-      rnl.sendQueries([req1]).then(() => {
+      return rnl.sendQueries([req1]).then(() => {
         assert.equal(req1.payload.response, 'PAYLOAD');
       });
     });
@@ -43,7 +43,7 @@ describe('Middleware / url', () => {
     });
   });
 
-  describe('url option as thunk', () => {
+  describe('`url` option as thunk', () => {
     const rnl = new RelayNetworkLayer([
       urlMiddleware({
         url: (_) => '/thunk_url', // eslint-disable-line
@@ -66,7 +66,7 @@ describe('Middleware / url', () => {
 
     it('should work with query', () => {
       const req1 = mockReq();
-      rnl.sendQueries([req1]).then(() => {
+      return rnl.sendQueries([req1]).then(() => {
         assert.equal(req1.payload.response, 'PAYLOAD');
       });
     });

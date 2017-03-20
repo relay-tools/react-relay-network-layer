@@ -69,7 +69,7 @@ Middlewares
   - `forceRetry` - function(cb, delay), when request is delayed for next retry, middleware will call this function and pass to it a callback and delay time. When you call this callback, middleware will proceed request immediately (default: `false`).
 - **authMiddleware** - for adding auth token, and refreshing it if gets 401 response from server.
   - `token` - string or function(req) which returns token. If function is provided, then it will be called for every request (so you may change tokens on fly).
-  - `tokenRefreshPromise`: - function(req, err) which must return promise with new token, called only if server returns 401 status code and this function is provided.
+  - `tokenRefreshPromise`: - function(req, err) which must return promise or regular value with a new token. This function is called when server returns 401 status code. After receiving a new token, middleware re-run query to the server with it seamlessly for Relay.
   - `allowEmptyToken` - allow made a request without Authorization header if token is empty (default: `false`).
   - `prefix` - prefix before token (default: `'Bearer '`).
   - `header` - name of the HTTP header to pass the token in (default: `'Authorization'`).

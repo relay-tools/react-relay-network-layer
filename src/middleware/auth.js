@@ -38,18 +38,26 @@ export default function authMiddleware(opts = {}) {
           }
           return next(req);
         })
-        .then(res => {
-          if (res.status === 401 && tokenRefreshPromise) {
-            throw new WrongTokenError('Received status 401 from server', res);
+        .catch(err => {
+          if (
+            err &&
+            err.fetchResponse &&
+            err.fetchResponse.status === 401 &&
+            tokenRefreshPromise
+          ) {
+            throw new WrongTokenError(
+              'Received status 401 from server',
+              err.fetchResponse
+            );
+          } else {
+            throw err;
           }
-          return res;
         })
         .catch(err => {
           if (err.name === 'WrongTokenError') {
             if (!tokenRefreshInProgress) {
-              tokenRefreshInProgress = tokenRefreshPromise(
-                req,
-                err.res
+              tokenRefreshInProgress = Promise.resolve(
+                tokenRefreshPromise(req, err.res)
               ).then(newToken => {
                 tokenRefreshInProgress = null;
                 return newToken;
