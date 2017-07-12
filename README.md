@@ -1,5 +1,5 @@
-ReactRelayNetworkLayer 2
-========================
+ReactRelayNetworkLayer (for Relay Classic)
+==========================================
 [![](https://img.shields.io/npm/v/react-relay-network-layer.svg)](https://www.npmjs.com/package/react-relay-network-layer)
 [![npm](https://img.shields.io/npm/dt/react-relay-network-layer.svg)](http://www.npmtrends.com/react-relay-network-layer)
 [![Travis](https://img.shields.io/travis/nodkz/react-relay-network-layer.svg?maxAge=2592000)](https://travis-ci.org/nodkz/react-relay-network-layer)
