@@ -18,7 +18,7 @@ describe('batchMiddleware', () => {
     return assert.isFulfilled(rnl.sendQueries([mockReq()]));
   });
 
-  it('should make a successfull batch request', () => {
+  it('should make a successfully batch request', () => {
     fetchMock.mock({
       matcher: '/graphql/batch',
       response: {
@@ -29,6 +29,23 @@ describe('batchMiddleware', () => {
     });
 
     return assert.isFulfilled(rnl.sendQueries([mockReq(1), mockReq(2)]));
+  });
+
+  it('should make a successfully batch request with duplicate request ids', () => {
+    fetchMock.mock({
+      matcher: '/graphql/batch',
+      response: {
+        status: 200,
+        body: [{ id: 1, data: {} }, { id: 2, data: {} }],
+      },
+      method: 'POST',
+    });
+
+    const req1 = mockReq(1);
+    const req2 = mockReq(2);
+    const req3 = mockReq(2);
+
+    return assert.isFulfilled(rnl.sendQueries([req1, req2, req3]));
   });
 
   it('should reject if server does not return response for request', () => {
@@ -52,6 +69,37 @@ describe('batchMiddleware', () => {
         assert(req2.error instanceof Error);
         assert(
           /Server does not return response for request/.test(req2.error.message)
+        );
+      })
+    );
+  });
+
+  it('should reject if server does not return response for duplicate request ids', () => {
+    fetchMock.mock({
+      matcher: '/graphql/batch',
+      response: {
+        status: 200,
+        body: [{ data: {} }, { data: {} }],
+      },
+      method: 'POST',
+    });
+
+    const req1 = mockReq(1);
+    const req2 = mockReq(2);
+    const req3 = mockReq(2);
+    return assert.isFulfilled(
+      rnl.sendQueries([req1, req2, req3]).then(() => {
+        assert(req1.error instanceof Error);
+        assert(
+          /Server does not return response for request/.test(req1.error.message)
+        );
+        assert(req2.error instanceof Error);
+        assert(
+          /Server does not return response for request/.test(req2.error.message)
+        );
+        assert(req3.error instanceof Error);
+        assert(
+          /Server does not return response for request/.test(req3.error.message)
         );
       })
     );
@@ -123,7 +171,7 @@ describe('batchMiddleware', () => {
     });
   });
 
-  it('should handle responces without payload wrapper', () => {
+  it('should handle responses without payload wrapper', () => {
     fetchMock.mock({
       matcher: '/graphql/batch',
       response: {

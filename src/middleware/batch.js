@@ -48,7 +48,10 @@ function passThroughBatch(req, next, opts) {
 
   // queue request
   return new Promise((resolve, reject) => {
-    singleton.batcher.requestMap[req.relayReqId] = {
+    const relayReqId = req.relayReqId;
+    const requestMap = singleton.batcher.requestMap;
+    requestMap[relayReqId] = requestMap[relayReqId] || [];
+    requestMap[relayReqId].push({
       req,
       completeOk: res => {
         req.done = true;
@@ -58,7 +61,7 @@ function passThroughBatch(req, next, opts) {
         req.done = true;
         reject(err);
       },
-    };
+    });
   });
 }
 
@@ -87,10 +90,10 @@ function sendRequests(requestMap, next, opts) {
 
   if (ids.length === 1) {
     // SEND AS SINGLE QUERY
-    const request = requestMap[ids[0]];
+    const requests = requestMap[ids[0]];
 
-    return next(request.req).then(res => {
-      request.completeOk(res);
+    return next(requests[0].req).then(res => {
+      requests.forEach(request => request.completeOk(res));
     });
   } else if (ids.length > 1) {
     // SEND AS BATCHED QUERY
@@ -108,7 +111,7 @@ function sendRequests(requestMap, next, opts) {
         Accept: '*/*',
         'Content-Type': 'application/json',
       },
-      body: `[${ids.map(id => requestMap[id].req.body).join(',')}]`,
+      body: `[${ids.map(id => requestMap[id][0].req.body).join(',')}]`,
     };
 
     return next(req)
@@ -119,16 +122,17 @@ function sendRequests(requestMap, next, opts) {
 
         batchResponse.json.forEach(res => {
           if (!res) return;
-          const request = requestMap[res.id];
-          if (request) {
+          const requests = requestMap[res.id];
+          if (requests) {
             const responsePayload = copyBatchResponse(batchResponse, res);
-            request.completeOk(responsePayload);
+            requests.forEach(request => request.completeOk(responsePayload));
           }
         });
       })
       .catch(e => {
         ids.forEach(id => {
-          requestMap[id].completeErr(e);
+          const requests = requestMap[id];
+          requests.forEach(request => request.completeErr(e));
         });
       });
   }
@@ -139,14 +143,17 @@ function sendRequests(requestMap, next, opts) {
 // check that server returns responses for all requests
 function finalizeUncompleted(batcher) {
   Object.keys(batcher.requestMap).forEach(id => {
-    if (!batcher.requestMap[id].req.done) {
-      batcher.requestMap[id].completeErr(
-        new Error(
-          `Server does not return response for request with id ${id} \n` +
-            `eg. { "id": "${id}", "data": {} }`
-        )
-      );
-    }
+    const requests = batcher.requestMap[id];
+    requests.forEach(request => {
+      if (!request.req.done) {
+        request.completeErr(
+          new Error(
+            `Server does not return response for request with id ${id} \n` +
+              `eg. { "id": "${id}", "data": {} }`
+          )
+        );
+      }
+    });
   });
 }
 
