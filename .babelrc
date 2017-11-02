@@ -9,6 +9,7 @@
           "targets": {
             "browsers": [
               "last 5 versions",
+              "ie 9",
               "defaults"
             ]
           },
@@ -24,6 +25,15 @@
           },
           "loose": true,
           "modules": false
+        }]
+      ]
+    },
+    "test": {
+      "presets": [
+        ["env", {
+          "targets": {
+            "node": "current"
+          },
         }]
       ]
     }

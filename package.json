@@ -33,12 +33,11 @@
   "devDependencies": {
     "babel-cli": "^6.26.0",
     "babel-eslint": "^8.0.1",
+    "babel-jest": "^21.2.0",
     "babel-plugin-transform-object-rest-spread": "^6.26.0",
     "babel-polyfill": "^6.26.0",
     "babel-preset-env": "^1.6.1",
     "babel-register": "^6.26.0",
-    "chai": "^4.1.2",
-    "chai-as-promised": "^7.1.1",
     "cz-conventional-changelog": "^2.1.0",
     "eslint": "^4.10.0",
     "eslint-config-airbnb-base": "^12.1.0",
@@ -48,8 +47,7 @@
     "eslint-plugin-prettier": "^2.3.1",
     "fetch-mock": "^5.13.1",
     "form-data": "^2.3.1",
-    "mocha": "^3.1.1",
-    "nyc": "^10.1.2",
+    "jest": "^21.2.1",
     "prettier": "^1.7.4",
     "rimraf": "^2.6.2",
     "semantic-release": "^8.2.0"
@@ -59,15 +57,9 @@
       "path": "./node_modules/cz-conventional-changelog"
     }
   },
-  "nyc": {
-    "exclude": [
-      "**/tests/**",
-      "resources",
-      "node_modules"
-    ],
-    "reporter": [
-      "lcov",
-      "text"
+  "jest": {
+    "roots": [
+      "<rootDir>/src"
     ]
   },
   "scripts": {
@@ -75,9 +67,9 @@
     "build-lib": "rimraf lib && BABEL_ENV=lib babel src -d lib",
     "build-es": "rimraf es && BABEL_ENV=es babel src -d es",
     "lint": "eslint src test *.js",
-    "coverage": "nyc npm run test:all",
-    "test": "BABEL_ENV=lib mocha --require test/mocha-bootload --compilers js:babel-register test/*.test.js test/**/*.test.js",
-    "test:all": "npm run lint && npm run test",
+    "coverage": "jest --coverage --maxWorkers 2",
+    "watch": "jest --watch",
+    "test": "npm run coverage && npm run lint",
     "semantic-release": "semantic-release pre && npm publish && semantic-release post"
   }
 }

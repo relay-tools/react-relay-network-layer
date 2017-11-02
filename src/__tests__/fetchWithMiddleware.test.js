@@ -1,9 +1,8 @@
 /* eslint-disable no-param-reassign */
 
-import { assert } from 'chai';
 import fetchMock from 'fetch-mock';
-import fetchWithMiddleware from '../src/fetchWithMiddleware';
-import { mockReq as mockRelayReq } from './testutils';
+import fetchWithMiddleware from '../fetchWithMiddleware';
+import { mockReq as mockRelayReq } from '../__mocks__/mockReq';
 
 function createMockReq(reqId) {
   const relayRequest = mockRelayReq(reqId);
@@ -32,16 +31,14 @@ describe('fetchWithMiddleware', () => {
     fetchMock.restore();
   });
 
-  it('should make a successfull request without middlewares', () => {
+  it('should make a successfull request without middlewares', async () => {
     fetchMock.post('/graphql', { id: 1, data: { user: 123 } });
-    return assert.isFulfilled(
-      fetchWithMiddleware(createMockReq(1), []).then(data => {
-        assert.deepEqual(data, { user: 123 });
-      })
-    );
+
+    const data = await fetchWithMiddleware(createMockReq(1), []);
+    expect(data).toEqual({ user: 123 });
   });
 
-  it('should make a successfull request with middlewares', () => {
+  it('should make a successfull request with middlewares', async () => {
     const numPlus5 = next => req =>
       next(req).then(res => {
         res.json.data.num += 5;
@@ -54,13 +51,11 @@ describe('fetchWithMiddleware', () => {
       });
 
     fetchMock.post('/graphql', { id: 1, data: { num: 1 } });
-    return assert.isFulfilled(
-      fetchWithMiddleware(createMockReq(1), [
-        numPlus5,
-        numMultiply10, // should be first, when changing response
-      ]).then(data => {
-        assert.deepEqual(data, { num: 15 });
-      })
-    );
+
+    const data = await fetchWithMiddleware(createMockReq(1), [
+      numPlus5,
+      numMultiply10, // should be first, when changing response
+    ]);
+    expect(data).toEqual({ num: 15 });
   });
 });

@@ -22,14 +22,14 @@
       "functions": "ignore",
     }],
     "prettier/prettier": ["error", {
-      "trailingComma": "es5",
+      "printWidth": 100,
       "singleQuote": true,
-      "printWidth": 80
+      "trailingComma": "es5",
     }],
     "no-plusplus": 0
   },
   "env": {
-    "mocha": true
+    "jest": true
   },
   "globals": {
     "fetch": true,
