@@ -12,24 +12,23 @@ export default function batchMiddleware(opts = {}) {
   const maxBatchSize = opts.maxBatchSize || DEFAULT_BATCH_SIZE;
   const singleton = {};
 
-  return next =>
-    req => {
-      // never batch mutations with files
-      // mutation without files can be batched if allowMutations = true
-      if (
-        req.relayReqType === 'mutation' &&
-        (!allowMutations || (global.FormData && req.body instanceof FormData))
-      ) {
-        return next(req);
-      }
+  return next => req => {
+    // never batch mutations with files
+    // mutation without files can be batched if allowMutations = true
+    if (
+      req.relayReqType === 'mutation' &&
+      (!allowMutations || (global.FormData && req.body instanceof FormData))
+    ) {
+      return next(req);
+    }
 
-      return passThroughBatch(req, next, {
-        batchTimeout,
-        batchUrl,
-        singleton,
-        maxBatchSize,
-      });
-    };
+    return passThroughBatch(req, next, {
+      batchTimeout,
+      batchUrl,
+      singleton,
+      maxBatchSize,
+    });
+  };
 }
 
 function passThroughBatch(req, next, opts) {
@@ -48,8 +47,8 @@ function passThroughBatch(req, next, opts) {
 
   // queue request
   return new Promise((resolve, reject) => {
-    const relayReqId = req.relayReqId;
-    const requestMap = singleton.batcher.requestMap;
+    const { relayReqId } = req;
+    const { requestMap } = singleton.batcher;
     requestMap[relayReqId] = requestMap[relayReqId] || [];
     requestMap[relayReqId].push({
       req,
@@ -72,15 +71,12 @@ function prepareNewBatcher(next, opts) {
     acceptRequests: true,
   };
 
-  setTimeout(
-    () => {
-      batcher.acceptRequests = false;
-      sendRequests(batcher.requestMap, next, opts)
-        .then(() => finalizeUncompleted(batcher))
-        .catch(() => finalizeUncompleted(batcher));
-    },
-    opts.batchTimeout
-  );
+  setTimeout(() => {
+    batcher.acceptRequests = false;
+    sendRequests(batcher.requestMap, next, opts)
+      .then(() => finalizeUncompleted(batcher))
+      .catch(() => finalizeUncompleted(batcher));
+  }, opts.batchTimeout);
 
   return batcher;
 }

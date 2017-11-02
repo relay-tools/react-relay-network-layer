@@ -14,12 +14,9 @@ function promiseTimeoutDelay(
 ) {
   return new Promise((resolve, reject) => {
     const timeoutPromise = () => {
-      const timeoutId = setTimeout(
-        () => {
-          reject(timeoutError);
-        },
-        timeoutMS
-      );
+      const timeoutId = setTimeout(() => {
+        reject(timeoutError);
+      }, timeoutMS);
 
       promise.then(
         res => {
@@ -35,24 +32,18 @@ function promiseTimeoutDelay(
 
     if (delayMS > 0) {
       let delayInProgress = true;
-      const delayId = setTimeout(
-        () => {
-          delayInProgress = false;
-          timeoutPromise();
-        },
-        delayMS
-      );
+      const delayId = setTimeout(() => {
+        delayInProgress = false;
+        timeoutPromise();
+      }, delayMS);
 
       if (forceRetryWhenDelay) {
-        forceRetryWhenDelay(
-          () => {
-            if (delayInProgress) {
-              clearTimeout(delayId);
-              timeoutPromise();
-            }
-          },
-          delayMS
-        );
+        forceRetryWhenDelay(() => {
+          if (delayInProgress) {
+            clearTimeout(delayId);
+            timeoutPromise();
+          }
+        }, delayMS);
       }
     } else {
       timeoutPromise();
@@ -82,50 +73,49 @@ export default function retryMiddleware(opts = {}) {
     }
   }
 
-  return next =>
-    req => {
-      if (req.relayReqType === 'mutation' && !allowMutations) {
-        return next(req);
-      }
+  return next => req => {
+    if (req.relayReqType === 'mutation' && !allowMutations) {
+      return next(req);
+    }
 
-      let attempt = 0;
+    let attempt = 0;
 
-      const sendTimedRequest = (timeout, delay = 0) => {
-        attempt++;
-        return promiseTimeoutDelay(next(req), timeout, delay, forceRetry)
-          .then(res => {
-            let statusError = false;
-            if (statusCodes) {
-              statusError = statusCodes.indexOf(res.status) !== -1;
-            } else {
-              statusError = res.status < 200 || res.status > 300;
+    const sendTimedRequest = (timeout, delay = 0) => {
+      attempt++;
+      return promiseTimeoutDelay(next(req), timeout, delay, forceRetry)
+        .then(res => {
+          let statusError = false;
+          if (statusCodes) {
+            statusError = statusCodes.indexOf(res.status) !== -1;
+          } else {
+            statusError = res.status < 200 || res.status > 300;
+          }
+
+          if (statusError) {
+            const retryDelayMS = retryAfterMs(attempt);
+            if (retryDelayMS) {
+              logger(
+                `response status ${res.status}, retrying after ${retryDelayMS} ms`
+              );
+              return sendTimedRequest(timeout, retryDelayMS);
             }
+          }
 
-            if (statusError) {
-              const retryDelayMS = retryAfterMs(attempt);
-              if (retryDelayMS) {
-                logger(
-                  `response status ${res.status}, retrying after ${retryDelayMS} ms`
-                );
-                return sendTimedRequest(timeout, retryDelayMS);
-              }
+          return res;
+        })
+        .catch(err => {
+          if (err === timeoutError) {
+            const retryDelayMS = retryAfterMs(attempt);
+            if (retryDelayMS) {
+              logger(`response timeout, retrying after ${retryDelayMS} ms`);
+              return sendTimedRequest(timeout, retryDelayMS);
             }
+          }
 
-            return res;
-          })
-          .catch(err => {
-            if (err === timeoutError) {
-              const retryDelayMS = retryAfterMs(attempt);
-              if (retryDelayMS) {
-                logger(`response timeout, retrying after ${retryDelayMS} ms`);
-                return sendTimedRequest(timeout, retryDelayMS);
-              }
-            }
-
-            return new Promise((resolve, reject) => reject(err));
-          });
-      };
-
-      return sendTimedRequest(fetchTimeout, 0);
+          return new Promise((resolve, reject) => reject(err));
+        });
     };
+
+    return sendTimedRequest(fetchTimeout, 0);
+  };
 }

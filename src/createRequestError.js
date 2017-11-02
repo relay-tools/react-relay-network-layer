@@ -18,18 +18,18 @@ function formatRequestErrors(request, errors) {
       // custom errors thrown in graphql-server may not have locations
       const locationMessage = locations
         ? '\n' +
-            locations
-              .map(({ column, line }) => {
-                const queryLine = queryLines[line - 1];
-                const offset = Math.min(column - 1, CONTEXT_BEFORE);
-                return [
-                  queryLine.substr(column - 1 - offset, CONTEXT_LENGTH),
-                  `${' '.repeat(Math.max(offset, 0))}^^^`,
-                ]
-                  .map(messageLine => indent + messageLine)
-                  .join('\n');
-              })
-              .join('\n')
+          locations
+            .map(({ column, line }) => {
+              const queryLine = queryLines[line - 1];
+              const offset = Math.min(column - 1, CONTEXT_BEFORE);
+              return [
+                queryLine.substr(column - 1 - offset, CONTEXT_LENGTH),
+                `${' '.repeat(Math.max(offset, 0))}^^^`,
+              ]
+                .map(messageLine => indent + messageLine)
+                .join('\n');
+            })
+            .join('\n')
         : '';
       return prefix + message + locationMessage;
     })

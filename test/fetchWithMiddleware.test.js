@@ -42,18 +42,16 @@ describe('fetchWithMiddleware', () => {
   });
 
   it('should make a successfull request with middlewares', () => {
-    const numPlus5 = next =>
-      req =>
-        next(req).then(res => {
-          res.json.data.num += 5;
-          return res;
-        });
-    const numMultiply10 = next =>
-      req =>
-        next(req).then(res => {
-          res.json.data.num *= 10;
-          return res;
-        });
+    const numPlus5 = next => req =>
+      next(req).then(res => {
+        res.json.data.num += 5;
+        return res;
+      });
+    const numMultiply10 = next => req =>
+      next(req).then(res => {
+        res.json.data.num *= 10;
+        return res;
+      });
 
     fetchMock.post('/graphql', { id: 1, data: { num: 1 } });
     return assert.isFulfilled(

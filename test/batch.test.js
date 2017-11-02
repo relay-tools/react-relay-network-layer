@@ -247,22 +247,19 @@ describe('batchMiddleware', () => {
 
       return assert.isFulfilled(rnl2.sendQueries([mockReq(4)])).then(() => {
         return new Promise(resolve => {
-          setTimeout(
-            () => {
-              const reqs = fetchMock.calls('/graphql/batch');
-              assert.equal(reqs.length, 2);
-              assert.equal(
-                reqs[0][1].body,
-                '[{"id":1,"query":"{}","variables":{}},{"id":4,"query":"{}","variables":{}}]'
-              );
-              assert.equal(
-                reqs[1][1].body,
-                '[{"id":2,"query":"{}","variables":{}},{"id":3,"query":"{}","variables":{}}]'
-              );
-              resolve();
-            },
-            100
-          );
+          setTimeout(() => {
+            const reqs = fetchMock.calls('/graphql/batch');
+            assert.equal(reqs.length, 2);
+            assert.equal(
+              reqs[0][1].body,
+              '[{"id":1,"query":"{}","variables":{}},{"id":4,"query":"{}","variables":{}}]'
+            );
+            assert.equal(
+              reqs[1][1].body,
+              '[{"id":2,"query":"{}","variables":{}},{"id":3,"query":"{}","variables":{}}]'
+            );
+            resolve();
+          }, 100);
         });
       });
     });

@@ -33,11 +33,13 @@ export default class RelayNetworkLayer {
 
   sendQueries(requests) {
     return queries(requests, req =>
-      fetchWithMiddleware(req, this._middlewares));
+      fetchWithMiddleware(req, this._middlewares)
+    );
   }
 
   sendMutation(request) {
     return mutation(request, req =>
-      fetchWithMiddleware(req, this._middlewares));
+      fetchWithMiddleware(req, this._middlewares)
+    );
   }
 }

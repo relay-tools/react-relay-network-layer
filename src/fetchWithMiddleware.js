@@ -1,4 +1,4 @@
-/* eslint-disable no-param-reassign */
+/* eslint-disable no-param-reassign, prefer-const */
 
 import createRequestError from './createRequestError';
 
