@@ -1,9 +1,15 @@
+/* @flow */
 /* eslint-disable no-param-reassign, prefer-template */
 
-export default function queries(relayRequestList, fetchWithMiddleware) {
+import type { RelayClassicRequest, MiddlewareNextFn, RRNLRequestObjectQuery } from './definition';
+
+export default function queries(
+  relayRequestList: RelayClassicRequest[],
+  fetchWithMiddleware: MiddlewareNextFn
+): Promise<any> {
   return Promise.all(
     relayRequestList.map(relayRequest => {
-      const req = {
+      const req: RRNLRequestObjectQuery = {
         relayReqId: relayRequest.getID(),
         relayReqObj: relayRequest,
         relayReqType: 'query',
@@ -21,7 +27,10 @@ export default function queries(relayRequestList, fetchWithMiddleware) {
 
       return fetchWithMiddleware(req)
         .then(data => relayRequest.resolve({ response: data }))
-        .catch(err => relayRequest.reject(err));
+        .catch(err => {
+          relayRequest.reject(err);
+          throw err;
+        });
     })
   );
 }

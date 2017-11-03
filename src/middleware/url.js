@@ -1,10 +1,19 @@
+/* @flow */
 /* eslint-disable no-param-reassign */
 
 import { isFunction } from '../utils';
+import type { Middleware, RRNLRequestObject } from '../definition';
 
-export default function urlMiddleware(opts = {}) {
-  const urlOrThunk = opts.url || '/graphql';
-  const fetchOpts = opts.opts;
+export type UrlMiddlewareOpts = {|
+  url: string | ((req: RRNLRequestObject) => string),
+  opts?: {
+    headers?: { [name: string]: string },
+  },
+|};
+
+export default function urlMiddleware(opts?: UrlMiddlewareOpts): Middleware {
+  const urlOrThunk = (opts && opts.url) || '/graphql';
+  const fetchOpts = (opts && opts.opts) || null;
 
   return next => req => {
     if (fetchOpts) {
@@ -16,6 +25,7 @@ export default function urlMiddleware(opts = {}) {
     }
 
     if (req.relayReqType !== 'batch-query') {
+      // $FlowFixMe
       req.url = isFunction(urlOrThunk) ? urlOrThunk(req) : urlOrThunk;
     }
 

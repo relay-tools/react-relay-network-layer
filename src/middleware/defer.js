@@ -1,6 +1,9 @@
+/* @flow */
 /* eslint-disable no-unused-vars */
 
-export default function deferMiddleware(opts = {}) {
+import type { Middleware } from '../definition';
+
+export default function deferMiddleware(opts?: void): Middleware {
   const middleware = next => req => next(req);
 
   middleware.supports = ['defer'];

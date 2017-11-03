@@ -1,3 +1,5 @@
+/* @flow */
+
 import fetchMock from 'fetch-mock';
 import { RelayNetworkLayer } from '../';
 import { mockReq } from '../__mocks__/mockReq';
@@ -34,9 +36,10 @@ describe('Queries tests', () => {
       method: 'POST',
     });
     const req1 = mockReq();
-    await rnl.sendQueries([req1]);
+    await rnl.sendQueries([req1]).catch(() => {});
+
     expect(req1.error instanceof Error).toBeTruthy();
-    expect(/Network connection error/.test(req1.error.message)).toBeTruthy();
+    expect(req1.error.toString()).toMatch('Network connection error');
   });
 
   it('should handle error response', async () => {
@@ -52,7 +55,7 @@ describe('Queries tests', () => {
     });
 
     const req1 = mockReq(1);
-    await rnl.sendQueries([req1]);
+    await rnl.sendQueries([req1]).catch(() => {});
     expect(req1.error instanceof Error).toBeTruthy();
   });
 
@@ -67,10 +70,12 @@ describe('Queries tests', () => {
     });
 
     const req1 = mockReq(1);
-    await rnl.sendQueries([req1]);
-    expect(req1.error instanceof Error).toBeTruthy();
-    expect(req1.error.message).toEqual('Something went completely wrong.');
-    expect(req1.error.fetchResponse.status).toEqual(500);
+    await rnl.sendQueries([req1]).catch(() => {});
+
+    const error: any = req1.error;
+    expect(error instanceof Error).toBeTruthy();
+    expect(error.message).toEqual('Something went completely wrong.');
+    expect(error.fetchResponse.status).toEqual(500);
   });
 
   it('should fail on missing `data` property', async () => {
@@ -85,7 +90,9 @@ describe('Queries tests', () => {
     });
 
     const req = mockReq();
-    await rnl.sendQueries([req]);
-    expect(req.error.toString()).toMatch('Server response.data was missing');
+    await rnl.sendQueries([req]).catch(() => {});
+
+    const error: any = req.error;
+    expect(error.toString()).toMatch('Server return empty `response.data`');
   });
 });

@@ -1,11 +1,13 @@
+/* @flow */
 /* eslint-disable no-param-reassign */
 
 import fetchMock from 'fetch-mock';
 import fetchWithMiddleware from '../fetchWithMiddleware';
-import { mockReq as mockRelayReq } from '../__mocks__/mockReq';
+import { mockReq } from '../__mocks__/mockReq';
+import type { RRNLRequestObject } from '../definition';
 
-function createMockReq(reqId) {
-  const relayRequest = mockRelayReq(reqId);
+function createMockReq(reqId): RRNLRequestObject {
+  const relayRequest: any = mockReq(reqId);
   const req = {
     relayReqId: relayRequest.getID(),
     relayReqObj: relayRequest,
@@ -15,13 +17,12 @@ function createMockReq(reqId) {
       Accept: '*/*',
       'Content-Type': 'application/json',
     },
+    body: JSON.stringify({
+      id: relayRequest.getID(),
+      query: relayRequest.getQueryString(),
+      variables: relayRequest.getVariables(),
+    }),
   };
-
-  req.body = JSON.stringify({
-    id: relayRequest.getID(),
-    query: relayRequest.getQueryString(),
-    variables: relayRequest.getVariables(),
-  });
 
   return req;
 }
@@ -40,13 +41,13 @@ describe('fetchWithMiddleware', () => {
 
   it('should make a successfull request with middlewares', async () => {
     const numPlus5 = next => req =>
-      next(req).then(res => {
-        res.json.data.num += 5;
+      next(req).then((res: any) => {
+        res.payload.data.num += 5;
         return res;
       });
     const numMultiply10 = next => req =>
-      next(req).then(res => {
-        res.json.data.num *= 10;
+      next(req).then((res: any) => {
+        res.payload.data.num *= 10;
         return res;
       });
 

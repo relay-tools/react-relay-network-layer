@@ -1,4 +1,8 @@
-export default function(graphqlHTTPMiddleware) {
+/* @flow */
+
+type ExpressMiddleware = (req: any, res: any) => any;
+
+export default function(graphqlHTTPMiddleware: ExpressMiddleware): ExpressMiddleware {
   return (req, res) => {
     const subResponses = [];
     return Promise.all(

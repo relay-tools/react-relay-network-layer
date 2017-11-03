@@ -1,3 +1,5 @@
+/* @flow */
+
 import fetchMock from 'fetch-mock';
 import { RelayNetworkLayer } from '../../';
 import { mockReq } from '../../__mocks__/mockReq';
@@ -38,7 +40,7 @@ describe('Middleware / url', () => {
     });
   });
 
-  describe('`url` option as thunk', async () => {
+  describe('`url` option as thunk', () => {
     const rnl = new RelayNetworkLayer([
       urlMiddleware({
         url: () => '/thunk_url',

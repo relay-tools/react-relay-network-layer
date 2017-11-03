@@ -1,7 +1,27 @@
+/* @flow */
+
+import type {
+  RelayClassicRequest,
+  RRNLRequestObject,
+  RRNLResponseObject,
+  GraphQLResponseErrors,
+} from './definition';
+
+class RRNLRequestError extends Error {
+  status: number;
+  req: RRNLRequestObject;
+  res: ?RRNLResponseObject;
+
+  constructor(msg: string) {
+    super(msg);
+    this.name = 'RRNLRequestError';
+  }
+}
+
 /**
  * Formats an error response from GraphQL server request.
  */
-function formatRequestErrors(request, errors) {
+function formatRequestErrors(request: RelayClassicRequest, errors: GraphQLResponseErrors): string {
   const CONTEXT_BEFORE = 20;
   const CONTEXT_LENGTH = 60;
 
@@ -36,42 +56,45 @@ function formatRequestErrors(request, errors) {
     .join('\n');
 }
 
-export default function createRequestError(
-  request,
-  requestType,
-  responseStatus,
-  payload
-) {
-  let errorReason;
-  if (typeof payload === 'object' && payload.errors) {
-    errorReason = formatRequestErrors(request, payload.errors);
-  } else if (payload) {
-    errorReason = payload;
-  } else {
-    errorReason = `Server response had an error status: ${responseStatus}`;
+function formatResponse(res: RRNLResponseObject): string {
+  return [
+    `Response:`,
+    `   Url: ${res.url}`,
+    `   Status code: ${res.status}`,
+    `   Status text: ${res.statusText}`,
+    `   Response headers: ${JSON.stringify(res.headers)}`,
+    `   Body: ${JSON.stringify(res.payload)}`,
+  ].join('\n');
+}
+
+export function getDebugName(req: RRNLRequestObject): string {
+  if (req.relayReqObj) {
+    return `${req.relayReqType} ${req.relayReqObj.getDebugName()}`;
+  }
+  return req.relayReqId;
+}
+
+export function createRequestError(req: RRNLRequestObject, res?: RRNLResponseObject) {
+  let errorReason = '';
+
+  if (!res || !res.payload) {
+    errorReason = 'Server return empty `response`.' + (res ? `\n\n${formatResponse(res)}` : '');
+  } else if (res.payload.errors) {
+    if (req.relayReqObj) {
+      errorReason = formatRequestErrors(req.relayReqObj, res.payload.errors);
+    } else {
+      errorReason = res.payload.errors.toString();
+    }
+  } else if (!res.payload.data) {
+    errorReason = 'Server return empty `response.data`.\n\n' + formatResponse(res);
   }
 
-  let error;
-  if (request.getDebugName) {
-    // for native Relay request
-    error = new Error(
-      `Server request for ${requestType} \`${request.getDebugName()}\` ` +
-        `failed for the following reasons:\n\n${errorReason}`
-    );
-  } else if (request && typeof request === 'object') {
-    // for batch request
-    const ids = Object.keys(request);
-    error = new Error(
-      `Server request for \`BATCH_QUERY:${ids.join(':')}\` ` +
-        `failed for the following reasons:\n\n${errorReason}`
-    );
-  } else {
-    error = new Error(
-      `Server request failed for the following reasons:\n\n${errorReason}`
-    );
-  }
+  const error = new RRNLRequestError(
+    `Server request for \`${getDebugName(req)}\` failed by the following reasons:\n\n${errorReason}`
+  );
 
-  error.source = payload;
-  error.status = responseStatus;
+  error.req = req;
+  error.res = res;
+  error.status = res ? res.status : 0;
   return error;
 }

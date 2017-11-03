@@ -1,56 +1,48 @@
+/* @flow */
 /* eslint-disable no-param-reassign, prefer-const */
 
-import createRequestError from './createRequestError';
+import { createRequestError } from './createRequestError';
+import type {
+  Middleware,
+  RRNLRequestObject,
+  RRNLResponseObject,
+  MiddlewareNextFn,
+} from './definition';
 
-export default function fetchWithMiddleware(reqFromRelay, middlewares) {
-  const fetchAfterAllWrappers = req => {
-    let { url, ...opts } = req;
+async function runFetch(req: RRNLRequestObject): Promise<RRNLResponseObject> {
+  let { url, ...opts } = req;
 
-    if (!url) {
-      if (req.relayReqType === 'batch-query') {
-        url = '/graphql/batch';
-      } else {
-        url = '/graphql';
-      }
+  if (!url) {
+    if (req.relayReqType === 'batch-query') {
+      url = '/graphql/batch';
+    } else {
+      url = '/graphql';
     }
+  }
 
-    return fetch(url, opts)
-      .then(res => {
-        if (res.status >= 200 && res.status < 300) {
-          return res;
-        }
-        return res.text().then(text => {
-          const err = new Error(text);
-          err.fetchResponse = res;
-          throw err;
-        });
-      })
-      .then(res => {
-        // sub-promise for combining `res` with parsed json
-        return res.json().then(json => {
-          res.json = json;
-          return res;
-        });
-      });
-  };
+  const res = await fetch(url, opts);
 
-  const wrappedFetch = compose(...middlewares)(fetchAfterAllWrappers);
+  if (res.status < 200 || res.status >= 300) {
+    const text = await res.text();
+    const err: any = new Error(text);
+    err.fetchResponse = res;
+    throw err;
+  }
 
-  return wrappedFetch(reqFromRelay).then(res => {
-    const payload = res.json;
-    if ({}.hasOwnProperty.call(payload, 'errors')) {
-      throw createRequestError(
-        reqFromRelay.relayReqObj,
-        reqFromRelay.relayReqType,
-        '200',
-        payload
-      );
-    } else if (!{}.hasOwnProperty.call(payload, 'data')) {
-      throw new Error(
-        'Server response.data was missing for query `' +
-          reqFromRelay.relayReqObj.getDebugName() +
-          '`.'
-      );
+  const payload = await res.json();
+  return { ...res, payload };
+}
+
+export default function fetchWithMiddleware(
+  req: RRNLRequestObject,
+  middlewares: Middleware[]
+): Promise<any> {
+  const wrappedFetch: MiddlewareNextFn = compose(...middlewares)(runFetch);
+
+  return wrappedFetch(req).then(res => {
+    const { payload } = res;
+    if (!payload || payload.hasOwnProperty('errors') || !payload.hasOwnProperty('data')) {
+      throw createRequestError(req, res);
     }
     return payload.data;
   });
@@ -72,7 +64,6 @@ function compose(...funcs) {
   } else {
     const last = funcs[funcs.length - 1];
     const rest = funcs.slice(0, -1);
-    return (...args) =>
-      rest.reduceRight((composed, f) => f(composed), last(...args));
+    return (...args) => rest.reduceRight((composed, f) => f(composed), last(...args));
   }
 }

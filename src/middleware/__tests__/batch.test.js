@@ -1,3 +1,5 @@
+/* @flow */
+
 import fetchMock from 'fetch-mock';
 import FormData from 'form-data';
 import { RelayNetworkLayer, batchMiddleware } from '../../';
@@ -68,7 +70,7 @@ describe('batchMiddleware', () => {
 
     const req1 = mockReq(1);
     const req2 = mockReq(2);
-    await rnl.sendQueries([req1, req2]);
+    await rnl.sendQueries([req1, req2]).catch(() => {});
 
     expect(req1.error).toBeInstanceOf(Error);
     expect(req1.error.toString()).toMatch('Server does not return response for request');
@@ -88,7 +90,8 @@ describe('batchMiddleware', () => {
     const req1 = mockReq(1);
     const req2 = mockReq(2);
     const req3 = mockReq(3);
-    await rnl.sendQueries([req1, req2, req3]);
+    await rnl.sendQueries([req1, req2, req3]).catch(() => {});
+
     expect(req1.error).toBeInstanceOf(Error);
     expect(req1.error.toString()).toMatch('Server does not return response for request');
     expect(req2.payload).toEqual({ response: { ok: 2 } });
@@ -106,7 +109,7 @@ describe('batchMiddleware', () => {
     });
     const req1 = mockReq(1);
     const req2 = mockReq(2);
-    await rnl.sendQueries([req1, req2]);
+    await rnl.sendQueries([req1, req2]).catch(() => {});
 
     expect(req1.error).toBeInstanceOf(Error);
     expect(req1.error.toString()).toMatch('Network connection error');
@@ -134,7 +137,7 @@ describe('batchMiddleware', () => {
 
     const req1 = mockReq(1);
     const req2 = mockReq(2);
-    await rnl.sendQueries([req1, req2]);
+    await rnl.sendQueries([req1, req2]).catch(() => {});
 
     expect(req1.error).toBeInstanceOf(Error);
     expect(req1.error.toString()).toMatch('major error');
@@ -158,7 +161,7 @@ describe('batchMiddleware', () => {
     const req2 = mockReq(2);
     const req3 = mockReq(3);
 
-    await rnl.sendQueries([req1, req2, req3]);
+    await rnl.sendQueries([req1, req2, req3]).catch(() => {});
 
     expect(req1.error.toString()).toMatch('Wrong response');
     expect(req2.error.toString()).toMatch('Wrong response');
@@ -184,7 +187,7 @@ describe('batchMiddleware', () => {
     const req1 = mockReq(1);
     const req2 = mockReq(2);
 
-    await rnl.sendQueries([req1, req2]);
+    await rnl.sendQueries([req1, req2]).catch(() => {});
 
     expect(req1.error).toBeInstanceOf(Error);
     expect(req1.error.toString()).toMatch('major error');
@@ -193,8 +196,6 @@ describe('batchMiddleware', () => {
   });
 
   describe('option `batchTimeout`', () => {
-    const rnl2 = new RelayNetworkLayer([batchMiddleware({ batchTimeout: 50 })]);
-
     beforeEach(() => {
       fetchMock.restore();
     });
@@ -209,6 +210,7 @@ describe('batchMiddleware', () => {
         method: 'POST',
       });
 
+      const rnl2 = new RelayNetworkLayer([batchMiddleware({ batchTimeout: 50 })]);
       rnl2.sendQueries([mockReq(1)]);
       setTimeout(() => rnl2.sendQueries([mockReq(2)]), 30);
 
@@ -217,7 +219,7 @@ describe('batchMiddleware', () => {
       const reqs = fetchMock.calls('/graphql/batch');
       expect(reqs).toHaveLength(1);
       expect(reqs[0][1].body).toEqual(
-        '[{"id":1,"query":"{}","variables":{}},{"id":2,"query":"{}","variables":{}},{"id":3,"query":"{}","variables":{}}]'
+        '[{"id":"1","query":"{}","variables":{}},{"id":"2","query":"{}","variables":{}},{"id":"3","query":"{}","variables":{}}]'
       );
     });
 
@@ -236,24 +238,28 @@ describe('batchMiddleware', () => {
         method: 'POST',
       });
 
+      const rnl2 = new RelayNetworkLayer([batchMiddleware({ batchTimeout: 50 })]);
       rnl2.sendQueries([mockReq(1)]);
-
       setTimeout(() => rnl2.sendQueries([mockReq(2)]), 60);
       setTimeout(() => rnl2.sendQueries([mockReq(3)]), 70);
+      rnl2.sendQueries([mockReq(4)]);
 
-      await rnl2.sendQueries([mockReq(4)]);
-      await new Promise(resolve => {
+      await new Promise((resolve, reject) => {
         setTimeout(() => {
-          const reqs = fetchMock.calls('/graphql/batch');
-          expect(reqs).toHaveLength(2);
-          expect(reqs[0][1].body).toBe(
-            '[{"id":1,"query":"{}","variables":{}},{"id":4,"query":"{}","variables":{}}]'
-          );
-          expect(reqs[1][1].body).toBe(
-            '[{"id":2,"query":"{}","variables":{}},{"id":3,"query":"{}","variables":{}}]'
-          );
-          resolve();
-        }, 100);
+          try {
+            const reqs = fetchMock.calls('/graphql/batch');
+            expect(reqs).toHaveLength(2);
+            expect(reqs[0][1].body).toBe(
+              '[{"id":"1","query":"{}","variables":{}},{"id":"4","query":"{}","variables":{}}]'
+            );
+            expect(reqs[1][1].body).toBe(
+              '[{"id":"2","query":"{}","variables":{}},{"id":"3","query":"{}","variables":{}}]'
+            );
+            resolve();
+          } catch (e) {
+            reject(e);
+          }
+        }, 200);
       });
     });
   });

@@ -1,7 +1,14 @@
+/* @flow */
 /* eslint-disable no-console */
 
-export default function loggerMiddleware(opts = {}) {
-  const logger = opts.logger || console.log.bind(console, '[RELAY-NETWORK]');
+import type { Middleware } from '../definition';
+
+export type LoggerMiddlewareOpts = {|
+  logger?: Function,
+|};
+
+export default function loggerMiddleware(opts?: LoggerMiddlewareOpts): Middleware {
+  const logger = (opts && opts.logger) || console.log.bind(console, '[RELAY-NETWORK]');
 
   return next => req => {
     const query = `${req.relayReqType} ${req.relayReqId}`;
@@ -9,11 +16,7 @@ export default function loggerMiddleware(opts = {}) {
     logger(`Run ${query}`, req);
     return next(req).then(res => {
       if (res.status !== 200) {
-        logger(
-          `Status ${res.status}: ${res.statusText} for ${query}`,
-          req,
-          res
-        );
+        logger(`Status ${res.status}: ${res.statusText} for ${query}`, req, res);
 
         if (res.status === 400 && req.relayReqType === 'batch-query') {
           logger(

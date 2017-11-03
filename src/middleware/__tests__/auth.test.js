@@ -1,3 +1,5 @@
+/* @flow */
+
 import fetchMock from 'fetch-mock';
 import { RelayNetworkLayer } from '../../';
 import { mockReq } from '../../__mocks__/mockReq';
@@ -8,7 +10,7 @@ describe('Middleware / auth', () => {
     const rnl = new RelayNetworkLayer([
       authMiddleware({
         token: '123',
-        tokenRefreshPromise: () => 345,
+        tokenRefreshPromise: () => '345',
       }),
     ]);
 
@@ -30,7 +32,7 @@ describe('Middleware / auth', () => {
       const req1 = mockReq();
       await rnl.sendQueries([req1]);
 
-      expect(req1.payload.response).toBe('PAYLOAD');
+      expect(req1.payload).toEqual({ response: 'PAYLOAD' });
       const reqs = fetchMock.calls('/graphql');
       expect(reqs).toHaveLength(1);
       expect(reqs[0][1].headers.Authorization).toBe('Bearer 123');
@@ -40,7 +42,7 @@ describe('Middleware / auth', () => {
       const req1 = mockReq();
       await rnl.sendMutation(req1);
 
-      expect(req1.payload.response).toBe('PAYLOAD');
+      expect(req1.payload).toEqual({ response: 'PAYLOAD' });
       const reqs = fetchMock.calls('/graphql');
       expect(reqs).toHaveLength(1);
       expect(reqs[0][1].headers.Authorization).toBe('Bearer 123');
@@ -51,7 +53,7 @@ describe('Middleware / auth', () => {
     const rnl = new RelayNetworkLayer([
       authMiddleware({
         token: () => '333',
-        tokenRefreshPromise: () => 345,
+        tokenRefreshPromise: () => '345',
         prefix: 'MyBearer ',
         header: 'MyAuthorization',
       }),
@@ -75,7 +77,7 @@ describe('Middleware / auth', () => {
       const req1 = mockReq();
       await rnl.sendQueries([req1]);
 
-      expect(req1.payload.response).toBe('PAYLOAD');
+      expect(req1.payload).toEqual({ response: 'PAYLOAD' });
       const reqs = fetchMock.calls('/graphql');
       expect(reqs).toHaveLength(1);
       expect(reqs[0][1].headers.MyAuthorization).toBe('MyBearer 333');
@@ -85,7 +87,7 @@ describe('Middleware / auth', () => {
       const req1 = mockReq();
       await rnl.sendMutation(req1);
 
-      expect(req1.payload.response).toBe('PAYLOAD');
+      expect(req1.payload).toEqual({ response: 'PAYLOAD' });
       const reqs = fetchMock.calls('/graphql');
       expect(reqs).toHaveLength(1);
       expect(reqs[0][1].headers.MyAuthorization).toBe('MyBearer 333');
@@ -98,11 +100,11 @@ describe('Middleware / auth', () => {
 
       fetchMock.mock({
         matcher: '/graphql',
-        response: {
-          status: 401,
+        response: (_, opts) => ({
+          status: opts.headers.Authorization === 'Bearer ValidToken' ? 200 : 401,
           body: { data: 'PAYLOAD' },
           sendAsJson: true,
-        },
+        }),
         method: 'POST',
       });
     });
@@ -111,7 +113,7 @@ describe('Middleware / auth', () => {
       const rnl = new RelayNetworkLayer([
         authMiddleware({
           token: '123',
-          tokenRefreshPromise: () => Promise.resolve(345),
+          tokenRefreshPromise: () => Promise.resolve('ValidToken'),
         }),
       ]);
 
@@ -120,14 +122,14 @@ describe('Middleware / auth', () => {
 
       const reqs = fetchMock.calls('/graphql');
       expect(reqs).toHaveLength(2);
-      expect(reqs[1][1].headers.Authorization).toBe('Bearer 345');
+      expect(reqs[1][1].headers.Authorization).toBe('Bearer ValidToken');
     });
 
     it('should work with mutation (provided regular value)', async () => {
       const rnl = new RelayNetworkLayer([
         authMiddleware({
           token: '123',
-          tokenRefreshPromise: () => 456,
+          tokenRefreshPromise: () => 'ValidToken',
         }),
       ]);
 
@@ -136,7 +138,7 @@ describe('Middleware / auth', () => {
 
       const reqs = fetchMock.calls('/graphql');
       expect(reqs).toHaveLength(2);
-      expect(reqs[1][1].headers.Authorization).toBe('Bearer 456');
+      expect(reqs[1][1].headers.Authorization).toBe('Bearer ValidToken');
     });
   });
 });

@@ -1,46 +1,62 @@
+/* @flow */
 /* eslint-disable import/prefer-default-export, no-param-reassign */
 
-export const mockReq = (reqid, { query, files } = {}) => {
-  if (!reqid) reqid = Math.random();
-
-  let error;
-  let payload;
-
-  return {
-    getID() {
-      return reqid;
-    },
-    getQueryString() {
-      return query || '{}';
-    },
-    getDebugName() {
-      return `debugname${reqid}`;
-    },
-    getVariables() {
-      return {};
-    },
-    getFiles() {
-      return files;
-    },
-    reject(err) {
-      error = err;
-    },
-    resolve(resp) {
-      payload = resp;
-    },
-    get error() {
-      return error;
-    },
-    get payload() {
-      return payload;
-    },
-  };
+type ReqData = {
+  query?: string,
+  varaibles?: Object,
+  files?: any,
 };
 
-export const mockReqWithSize = (reqid, size) => {
+type ReqId = string;
+
+class MockReq {
+  reqid: ReqId;
+  reqData: ReqData;
+  error: Error;
+  payload: Object;
+
+  constructor(reqid?: ReqId, reqData?: ReqData = {}) {
+    this.reqid = reqid || Math.random().toString();
+    this.reqData = reqData;
+  }
+
+  getID(): ReqId {
+    return this.reqid;
+  }
+
+  getQueryString(): string {
+    return this.reqData.query || '{}';
+  }
+
+  getDebugName(): string {
+    return `debugname${this.reqid}`;
+  }
+
+  getVariables(): Object {
+    return this.reqData.varaibles || {};
+  }
+
+  getFiles(): any {
+    return this.reqData.files;
+  }
+
+  reject(err: Error) {
+    this.error = err;
+  }
+
+  resolve(resp: Object) {
+    this.payload = resp;
+  }
+}
+
+export function mockReq(reqid?: ReqId | number, data?: ReqData): MockReq {
+  return new MockReq(reqid ? reqid.toString() : undefined, data);
+}
+
+export function mockReqWithSize(reqid: ReqId | number, size: number): MockReq {
   return mockReq(reqid, { query: `{${'x'.repeat(size)}}` });
-};
+}
 
-export const mockReqWithFiles = reqid => {
+export function mockReqWithFiles(reqid: ReqId | number): MockReq {
   return mockReq(reqid, { files: { file1: 'data', file2: 'data' } });
-};
+}

@@ -1,3 +1,5 @@
+/* @flow */
+
 import fetchMock from 'fetch-mock';
 import { RelayNetworkLayer } from '../';
 import { mockReq } from '../__mocks__/mockReq';
@@ -26,9 +28,10 @@ describe('Mutation tests', () => {
       method: 'POST',
     });
     const req1 = mockReq();
-    await rnl.sendMutation(req1);
+    await rnl.sendMutation(req1).catch(() => {});
+
     expect(req1.error instanceof Error).toBeTruthy();
-    expect(/Network connection error/.test(req1.error.message)).toBeTruthy();
+    expect(req1.error.toString()).toMatch('Network connection error');
   });
 
   it('should handle error response', async () => {
@@ -44,7 +47,7 @@ describe('Mutation tests', () => {
     });
 
     const req1 = mockReq(1);
-    await rnl.sendMutation(req1);
+    await rnl.sendMutation(req1).catch(() => {});
     expect(req1.error instanceof Error).toBeTruthy();
   });
 
@@ -60,10 +63,11 @@ describe('Mutation tests', () => {
     });
 
     const req1 = mockReq(1);
-    await rnl.sendMutation(req1);
+    await rnl.sendMutation(req1).catch(() => {});
 
-    expect(req1.error instanceof Error).toBeTruthy();
-    expect(req1.error.message).toEqual('Something went completely wrong.');
-    expect(req1.error.fetchResponse.status).toEqual(500);
+    const error: any = req1.error;
+    expect(error instanceof Error).toBeTruthy();
+    expect(error.message).toEqual('Something went completely wrong.');
+    expect(error.fetchResponse.status).toEqual(500);
   });
 });
