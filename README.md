@@ -7,7 +7,7 @@ ReactRelayNetworkLayer (for Relay Classic)
 [![semantic-release](https://img.shields.io/badge/%20%20%F0%9F%93%A6%F0%9F%9A%80-semantic--release-e10079.svg)](https://github.com/semantic-release/semantic-release)
 ![FlowType compatible](https://img.shields.io/badge/flowtype-compatible-brightgreen.svg)
 
-#### Currently this library supports **Relay classic** and compat mode. If you need **Relay Modern**, please subscribe on [issue #50](https://github.com/nodkz/react-relay-network-layer/issues/50). I'm not fulltime in OSS, so it will take some time. Thanks for patience.
+#### For **Relay Modern** please use [react-relay-network-modern](https://github.com/nodkz/react-relay-network-modern) package.
 
 The `ReactRelayNetworkLayer` is a [Relay Network Layer](https://facebook.github.io/relay/docs/guides-network-layer.html)
 with various middlewares which can manipulate requests/responses on the fly (change auth headers, request url or perform some fallback if request fails), batch several relay request by timeout into one http request.
