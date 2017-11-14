@@ -9,7 +9,7 @@ import type {
   MiddlewareNextFn,
 } from './definition';
 
-async function runFetch(req: RRNLRequestObject): Promise<RRNLResponseObject> {
+function runFetch(req: RRNLRequestObject): Promise<RRNLResponseObject> {
   let { url, ...opts } = req;
 
   if (!url) {
@@ -20,17 +20,22 @@ async function runFetch(req: RRNLRequestObject): Promise<RRNLResponseObject> {
     }
   }
 
-  const res = await fetch(url, opts);
-
-  if (res.status < 200 || res.status >= 300) {
-    const text = await res.text();
-    const err: any = new Error(text);
-    err.fetchResponse = res;
-    throw err;
-  }
-
-  const payload = await res.json();
-  return { ...res, payload };
+  return fetch(url, opts)
+    .then(res => {
+      if (res.status < 200 || res.status >= 300) {
+        return res.text().then(text => {
+          const err: any = new Error(text);
+          err.fetchResponse = res;
+          throw err;
+        });
+      }
+      return res;
+    })
+    .then(res => {
+      return res.json().then(payload => {
+        return { ...res, payload };
+      });
+    });
 }
 
 export default function fetchWithMiddleware(

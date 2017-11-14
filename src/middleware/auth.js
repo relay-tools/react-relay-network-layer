@@ -34,42 +34,44 @@ export default function authMiddleware(opts?: AuthMiddlewareOpts): Middleware {
 
   let tokenRefreshInProgress = null;
 
-  return next => async req => {
-    try {
+  return next => req => {
+    return new Promise((resolve, reject) => {
       // $FlowFixMe
-      const token = await (isFunction(tokenOrThunk) ? tokenOrThunk(req) : tokenOrThunk);
+      const token: string = isFunction(tokenOrThunk) ? tokenOrThunk(req) : tokenOrThunk;
 
       if (!token && tokenRefreshPromise && !allowEmptyToken) {
-        throw new WrongTokenError('Empty token');
+        reject(new WrongTokenError('Empty token'));
       }
+      resolve(token);
+    })
+      .then(token => {
+        if (token) {
+          req.headers[header] = `${prefix}${token}`;
+        }
+        return next(req);
+      })
+      .catch(e => {
+        if (e && tokenRefreshPromise) {
+          if (e.message === 'Empty token' || (e.fetchResponse && e.fetchResponse.status === 401)) {
+            if (tokenRefreshPromise) {
+              if (!tokenRefreshInProgress) {
+                tokenRefreshInProgress = Promise.resolve(
+                  tokenRefreshPromise(req, e.fetchResponse)
+                ).then(newToken => {
+                  tokenRefreshInProgress = null;
+                  return newToken;
+                });
+              }
 
-      if (token) {
-        req.headers[header] = `${prefix}${token}`;
-      }
-      const res = await next(req);
-      return res;
-    } catch (e) {
-      if (e && tokenRefreshPromise) {
-        if (e.message === 'Empty token' || (e.fetchResponse && e.fetchResponse.status === 401)) {
-          if (tokenRefreshPromise) {
-            if (!tokenRefreshInProgress) {
-              tokenRefreshInProgress = Promise.resolve(
-                tokenRefreshPromise(req, e.fetchResponse)
-              ).then(newToken => {
-                tokenRefreshInProgress = null;
-                return newToken;
+              return tokenRefreshInProgress.then(newToken => {
+                req.headers[header] = `${prefix}${newToken}`;
+                return next(req); // re-run query with new token
               });
             }
-
-            return tokenRefreshInProgress.then(newToken => {
-              req.headers[header] = `${prefix}${newToken}`;
-              return next(req); // re-run query with new token
-            });
           }
         }
-      }
 
-      throw e;
-    }
+        throw e;
+      });
   };
 }
