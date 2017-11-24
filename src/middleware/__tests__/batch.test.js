@@ -38,6 +38,44 @@ describe('batchMiddleware', () => {
     expect(req2.payload).toEqual({ response: { ok: 2 } });
   });
 
+  it('should make a successfully batch request without server IDs', async () => {
+    fetchMock.mock({
+      matcher: '/graphql/batch',
+      response: {
+        status: 200,
+        body: [{ data: { ok: 1 } }, { data: { ok: 2 } }],
+      },
+      method: 'POST',
+    });
+
+    const req1 = mockReq(1);
+    const req2 = mockReq(2);
+    await rnl.sendQueries([req1, req2]);
+    expect(req1.payload).toEqual({ response: { ok: 1 } });
+    expect(req2.payload).toEqual({ response: { ok: 2 } });
+  });
+
+  it('should reject if server returns a different number of responses than requests', async () => {
+    fetchMock.mock({
+      matcher: '/graphql/batch',
+      response: {
+        status: 200,
+        body: [{ data: { ok: 2 } }],
+      },
+      method: 'POST',
+    });
+
+    const req1 = mockReq(1);
+    const req2 = mockReq(2);
+    await rnl.sendQueries([req1, req2]).catch(() => {});
+    expect(req1.error.toString()).toMatch(
+      'Server returned a different number of responses than requested.'
+    );
+    expect(req2.error.toString()).toMatch(
+      'Server returned a different number of responses than requested.'
+    );
+  });
+
   it('should make a successfully batch request with duplicate request ids', async () => {
     fetchMock.mock({
       matcher: '/graphql/batch',
@@ -63,7 +101,7 @@ describe('batchMiddleware', () => {
       matcher: '/graphql/batch',
       response: {
         status: 200,
-        body: [{ data: {} }, { id: 2, data: { ok: 2 } }],
+        body: [{ id: 2, data: { ok: 2 } }],
       },
       method: 'POST',
     });
@@ -82,14 +120,14 @@ describe('batchMiddleware', () => {
       matcher: '/graphql/batch',
       response: {
         status: 200,
-        body: [{ data: {} }, { id: 2, data: { ok: 2 } }],
+        body: [{ id: 2, data: { ok: 2 } }],
       },
       method: 'POST',
     });
 
     const req1 = mockReq(1);
     const req2 = mockReq(2);
-    const req3 = mockReq(3);
+    const req3 = mockReq(1);
     await rnl.sendQueries([req1, req2, req3]).catch(() => {});
 
     expect(req1.error).toBeInstanceOf(Error);
