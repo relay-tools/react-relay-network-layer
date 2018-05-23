@@ -1,4 +1,8 @@
 [ignore]
+<PROJECT_ROOT>/lib/.*
+<PROJECT_ROOT>/es/.*
+<PROJECT_ROOT>/node8/.*
+<PROJECT_ROOT>/mjs/.*
 .*/node_modules/ajv.*
 .*/node_modules/acorn.*
 .*/node_modules/async.*
@@ -37,4 +41,3 @@
 [options]
 esproposal.class_instance_fields=enable
 suppress_comment= \\(.\\|\n\\)*\\$FlowFixMe
-unsafe.enable_getters_and_setters=true

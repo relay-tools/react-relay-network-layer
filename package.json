@@ -1,26 +1,16 @@
 {
   "name": "react-relay-network-layer",
   "version": "0.0.0-semantically-released",
-  "description": "Network Layer for React Relay and Express (Batch Queries, AuthToken, Logging, Retry)",
-  "files": [
-    "es",
-    "lib"
-  ],
+  "description":
+    "Network Layer for React Relay and Express (Batch Queries, AuthToken, Logging, Retry)",
+  "files": ["es", "lib"],
   "main": "lib/index.js",
   "jsnext:main": "es/index.js",
   "repository": {
     "type": "git",
     "url": "https://github.com/nodkz/react-relay-network-layer.git"
   },
-  "keywords": [
-    "relay",
-    "react",
-    "network layer",
-    "batch",
-    "express",
-    "jwt",
-    "auth token"
-  ],
+  "keywords": ["relay", "react", "network layer", "batch", "express", "jwt", "auth token"],
   "license": "MIT",
   "bugs": {
     "url": "https://github.com/nodkz/react-relay-network-layer/issues"
@@ -61,19 +51,19 @@
     }
   },
   "jest": {
-    "roots": [
-      "<rootDir>/src"
-    ]
+    "roots": ["<rootDir>/src"]
   },
   "scripts": {
     "build": "npm run build-lib && npm run build-es && npm run build-flow",
     "build-lib": "rimraf lib && BABEL_ENV=lib babel src --ignore __tests__,__mocks__ -d lib",
     "build-es": "rimraf es && BABEL_ENV=es babel src --ignore __tests__,__mocks__ -d es",
-    "build-flow": "find ./src -name '*.js' -not -path '*/__*' | while read filepath; do cp $filepath `echo $filepath | sed 's/\\/src\\//\\/lib\\//g'`.flow; done",
+    "build-flow":
+      "find ./src -name '*.js' -not -path '*/__*' | while read filepath; do cp $filepath `echo $filepath | sed 's/\\/src\\//\\/lib\\//g'`.flow; done",
     "lint": "eslint src test *.js",
     "coverage": "jest --coverage --maxWorkers 2",
     "watch": "jest --watch",
-    "test": "npm run coverage && npm run lint",
+    "test": "npm run coverage && npm run lint && npm run flow",
+    "flow": "flow",
     "semantic-release": "semantic-release pre && npm publish && semantic-release post"
   }
 }

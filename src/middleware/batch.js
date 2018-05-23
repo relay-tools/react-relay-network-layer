@@ -174,17 +174,18 @@ function sendRequests(requestMap: BatchRequestMap, next, opts) {
 
     return next(req)
       .then(batchResponse => {
-        if (!batchResponse || !Array.isArray(batchResponse.payload)) {
+        const payload = batchResponse ? batchResponse.payload : null;
+        if (!Array.isArray(payload)) {
           throw new Error('Wrong response from server');
         }
 
-        const responseHasIds: boolean = batchResponse.payload.every(response => response.id);
-        if (!responseHasIds && ids.length !== batchResponse.payload.length) {
+        const responseHasIds: boolean = payload.every(response => response.id);
+        if (!responseHasIds && ids.length !== payload.length) {
           throw new Error(`Server returned a different number of responses than requested.
             It's not possible to correlate requests and responses`);
         }
 
-        batchResponse.payload.forEach((res, i) => {
+        payload.forEach((res, i) => {
           if (!res) return;
           const request = responseHasIds ? requestMap[res.id] : requestMap[ids[i]];
 

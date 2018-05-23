@@ -20,7 +20,7 @@ function runFetch(req: RRNLRequestObject): Promise<RRNLResponseObject> {
     }
   }
 
-  return fetch(url, opts)
+  return fetch(url, (opts: any))
     .then(res => {
       if (res.status < 200 || res.status >= 300) {
         return res.text().then(text => {
