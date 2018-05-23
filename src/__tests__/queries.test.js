@@ -36,10 +36,14 @@ describe('Queries tests', () => {
       method: 'POST',
     });
     const req1 = mockReq();
-    await rnl.sendQueries([req1]).catch(() => {});
 
-    expect(req1.error instanceof Error).toBeTruthy();
-    expect(req1.error.toString()).toMatch('Network connection error');
+    expect.assertions(2);
+    try {
+      await rnl.sendQueries([req1]);
+    } catch (e) {
+      expect(e instanceof Error).toBeTruthy();
+      expect(e.toString()).toMatch('Network connection error');
+    }
   });
 
   it('should handle error response', async () => {
