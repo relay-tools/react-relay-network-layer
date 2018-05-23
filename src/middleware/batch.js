@@ -130,9 +130,13 @@ function prepareNewBatcher(next, opts): Batcher {
 
   setTimeout(() => {
     batcher.acceptRequests = false;
-    sendRequests(batcher.requestMap, next, opts)
-      .then(() => finalizeUncompleted(batcher.requestMap))
-      .catch(() => finalizeUncompleted(batcher.requestMap));
+    try {
+      sendRequests(batcher.requestMap, next, opts)
+        .then(() => finalizeUncompleted(batcher.requestMap))
+        .catch(() => finalizeUncompleted(batcher.requestMap));
+    } catch (e) {
+      finalizeUncompleted(batcher.requestMap, e);
+    }
   }, opts.batchTimeout);
 
   return batcher;
@@ -201,15 +205,16 @@ function sendRequests(requestMap: BatchRequestMap, next, opts) {
 }
 
 // check that server returns responses for all requests
-function finalizeUncompleted(requestMap: BatchRequestMap) {
+function finalizeUncompleted(requestMap: BatchRequestMap, e?: Error) {
   Object.keys(requestMap).forEach(id => {
     const request = requestMap[id];
     if (!request.done) {
       request.completeErr(
-        new Error(
-          `Server does not return response for request with id ${id} \n` +
-            `Response should have following shape { "id": "${id}", "data": {} }`
-        )
+        e ||
+          new Error(
+            `Server does not return response for request with id ${id} \n` +
+              `Response should have following shape { "id": "${id}", "data": {} }`
+          )
       );
     }
   });

@@ -145,8 +145,10 @@ describe('batchMiddleware', () => {
       },
       method: 'POST',
     });
+
     const req1 = mockReq(1);
     const req2 = mockReq(2);
+
     await rnl.sendQueries([req1, req2]).catch(() => {});
 
     expect(req1.error).toBeInstanceOf(Error);
