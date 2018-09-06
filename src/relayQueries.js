@@ -1,11 +1,15 @@
 /* @flow */
 /* eslint-disable no-param-reassign, prefer-template */
 
-import type { RelayClassicRequest, MiddlewareNextFn, RRNLRequestObjectQuery } from './definition';
+import type {
+  RelayClassicRequest,
+  FetchWithMiddleware,
+  RRNLRequestObjectQuery,
+} from './definition';
 
 export default function queries(
   relayRequestList: RelayClassicRequest[],
-  fetchWithMiddleware: MiddlewareNextFn
+  fetchWithMiddleware: FetchWithMiddleware
 ): Promise<any> {
   return Promise.all(
     relayRequestList.map(relayRequest => {

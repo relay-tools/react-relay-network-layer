@@ -2,6 +2,7 @@
 
 import type { BatchRequestMap } from './middleware/batch';
 
+export type FetchWithMiddleware = (req: RRNLRequestObject) => Promise<RRNLResponsePayload>;
 export type MiddlewareNextFn = (req: RRNLRequestObject) => Promise<RRNLResponseObject>;
 export type Middleware = (next: MiddlewareNextFn) => MiddlewareNextFn;
 // {
@@ -52,6 +53,11 @@ export type GraphQLResponse = {
   data?: any,
   errors?: GraphQLResponseErrors,
 };
+
+export type RRNLResponsePayload = {|
+  +data: ?mixed,
+  +errors?: ?mixed,
+|};
 
 export type RRNLResponseObject = {
   ok: any,

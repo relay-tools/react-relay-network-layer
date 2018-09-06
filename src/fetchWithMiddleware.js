@@ -8,6 +8,7 @@ import type {
   RRNLResponseObject,
   MiddlewareNextFn,
   RRNLOptions,
+  RRNLResponsePayload,
 } from './definition';
 
 function runFetch(req: RRNLRequestObject): Promise<RRNLResponseObject> {
@@ -43,7 +44,7 @@ export default function fetchWithMiddleware(
   req: RRNLRequestObject,
   middlewares: Middleware[],
   options: RRNLOptions
-): Promise<any> {
+): Promise<RRNLResponsePayload> {
   const wrappedFetch: MiddlewareNextFn = compose(...middlewares)(runFetch);
 
   return wrappedFetch(req).then(res => {

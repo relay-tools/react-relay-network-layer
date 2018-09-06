@@ -4,12 +4,12 @@
 import type {
   RRNLRequestObjectMutation,
   RelayClassicRequest,
-  MiddlewareNextFn,
+  FetchWithMiddleware,
 } from './definition';
 
 export default function mutation(
   relayRequest: RelayClassicRequest,
-  fetchWithMiddleware: MiddlewareNextFn
+  fetchWithMiddleware: FetchWithMiddleware
 ): Promise<any> {
   const commonReq: $Shape<RRNLRequestObjectMutation> = {
     method: 'POST',
