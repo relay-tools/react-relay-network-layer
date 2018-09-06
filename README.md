@@ -2,12 +2,12 @@ ReactRelayNetworkLayer (for Relay Classic)
 ==========================================
 [![](https://img.shields.io/npm/v/react-relay-network-layer.svg)](https://www.npmjs.com/package/react-relay-network-layer)
 [![npm](https://img.shields.io/npm/dt/react-relay-network-layer.svg)](http://www.npmtrends.com/react-relay-network-layer)
-[![Travis](https://img.shields.io/travis/nodkz/react-relay-network-layer.svg?maxAge=2592000)](https://travis-ci.org/nodkz/react-relay-network-layer)
+[![Travis](https://img.shields.io/travis/relay-tools/react-relay-network-layer.svg?maxAge=2592000)](https://travis-ci.org/relay-tools/react-relay-network-layer)
 [![Commitizen friendly](https://img.shields.io/badge/commitizen-friendly-brightgreen.svg)](http://commitizen.github.io/cz-cli/)
 [![semantic-release](https://img.shields.io/badge/%20%20%F0%9F%93%A6%F0%9F%9A%80-semantic--release-e10079.svg)](https://github.com/semantic-release/semantic-release)
 ![FlowType compatible](https://img.shields.io/badge/flowtype-compatible-brightgreen.svg)
 
-#### For **Relay Modern** please use [react-relay-network-modern](https://github.com/nodkz/react-relay-network-modern) package.
+#### For **Relay Modern** please use [react-relay-network-modern](https://github.com/relay-tools/react-relay-network-modern) package.
 
 The `ReactRelayNetworkLayer` is a [Relay Network Layer](https://facebook.github.io/relay/docs/guides-network-layer.html)
 with various middlewares which can manipulate requests/responses on the fly (change auth headers, request url or perform some fallback if request fails), batch several relay request by timeout into one http request.
@@ -49,17 +49,17 @@ Relay.injectNetworkLayer(new RelayNetworkLayer([
 
 Big thanks to @brad-decker and @jeanregisser in helping to done this release.
 
-Previous documentation for version 1.x.x can be found [here](https://github.com/nodkz/react-relay-network-layer/blob/6eb361668cd81b760a8c99e8265f10416d802dd3/README.md).
+Previous documentation for version 1.x.x can be found [here](https://github.com/relay-tools/react-relay-network-layer/blob/6eb361668cd81b760a8c99e8265f10416d802dd3/README.md).
 
 Middlewares
 ===========
 
 ### Available middlewares:
-- **your custom inline middleware** - [see example](https://github.com/nodkz/react-relay-network-layer#example-of-injecting-networklayer-with-middlewares-on-the-client-side) below where added `credentials` and `headers` to the `fetch` method.
+- **your custom inline middleware** - [see example](https://github.com/relay-tools/react-relay-network-layer#example-of-injecting-networklayer-with-middlewares-on-the-client-side) below where added `credentials` and `headers` to the `fetch` method.
   - `next => req => { /* your modification of 'req' object */ return next(req); }`
 - **urlMiddleware** - for manipulating fetch `url` on fly via thunk.
   - `url` - string or function(req) for single request (default: `/graphql`)  
-- **batchMiddleware** - gather some period of time relay-requests and sends it as one http-request. You server must support batch request, [how to setup your server](https://github.com/nodkz/react-relay-network-layer#example-how-to-enable-batching)
+- **batchMiddleware** - gather some period of time relay-requests and sends it as one http-request. You server must support batch request, [how to setup your server](https://github.com/relay-tools/react-relay-network-layer#example-how-to-enable-batching)
   - `batchUrl` - string or function(requestMap). Url of the server endpoint for batch request execution (default: `/graphql/batch`)
   - `batchTimeout` - integer in milliseconds, period of time for gathering multiple requests before sending them to the server. Will delay sending of the requests on specified in this option period of time, so be careful and keep this value small. (default: `0`)
   - `maxBatchSize` - integer representing maximum size of request to be sent in a single batch. Once a request hits the provided size in length a new batch request is ran. Actual for hardcoded limit in 100kb per request in [express-graphql](https://github.com/graphql/express-graphql/blob/master/src/parseBody.js#L112) module. (default: `102400` characters, roughly 100kb for 1-byte characters or 200kb for 2-byte characters)
@@ -254,7 +254,7 @@ server.listen(port, () => {
   console.log(`The server is running at http://localhost:${port}/`);
 });
 ```
-[More complex example](https://github.com/nodkz/react-relay-network-layer/blob/master/examples/dataLoaderPerBatchRequest.js) of how you can use a single [DataLoader](https://github.com/facebook/dataloader) for all (batched) queries within a one HTTP-request.
+[More complex example](https://github.com/relay-tools/react-relay-network-layer/blob/master/examples/dataLoaderPerBatchRequest.js) of how you can use a single [DataLoader](https://github.com/facebook/dataloader) for all (batched) queries within a one HTTP-request.
 
 If you are on Koa@2, [koa-graphql-batch](https://github.com/mattecapu/koa-graphql-batch) provides the same functionality as `graphqlBatchHTTPWrapper` (see its docs for usage example).
 
@@ -275,7 +275,7 @@ Internally batching in NetworkLayer prepare list of queries `[ {id, query, varia
 
 Recommended modules
 ==========
-- **[babel-plugin-transform-relay-hot](https://github.com/nodkz/babel-plugin-transform-relay-hot)** - Babel 6 plugin for transforming `Relay.QL` tagged templates via the GraphQL json schema file. Each time when schema file was changed, the wrapper updates instance of standard `babelRelayPlugin` with new schema without completely restarting dev server.
+- **[babel-plugin-transform-relay-hot](https://github.com/relay-tools/babel-plugin-transform-relay-hot)** - Babel 6 plugin for transforming `Relay.QL` tagged templates via the GraphQL json schema file. Each time when schema file was changed, the wrapper updates instance of standard `babelRelayPlugin` with new schema without completely restarting dev server.
 
 
 Contribute
@@ -283,9 +283,9 @@ Contribute
 I actively welcome pull requests with code and doc fixes.
 Also if you made great middleware and want share it within this module, please feel free to open PR.
 
-[CHANGELOG](https://github.com/nodkz/react-relay-network-layer/blob/master/CHANGELOG.md)
+[CHANGELOG](https://github.com/relay-tools/react-relay-network-layer/blob/master/CHANGELOG.md)
 
 
 License
 =======
-[MIT](https://github.com/nodkz/react-relay-network-layer/blob/master/LICENSE.md)
+[MIT](https://github.com/relay-tools/react-relay-network-layer/blob/master/LICENSE.md)
