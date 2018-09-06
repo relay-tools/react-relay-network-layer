@@ -1,9 +1,9 @@
 /* @flow */
 
 import fetchMock from 'fetch-mock';
-import { RelayNetworkLayer } from '../../';
+import { RelayNetworkLayer } from '../..';
 import { mockReq } from '../../__mocks__/mockReq';
-import authMiddleware from '../../middleware/auth';
+import authMiddleware from '../auth';
 
 describe('Middleware / auth', () => {
   describe('`token` option as string (with default `prefix` and `header`)', () => {
