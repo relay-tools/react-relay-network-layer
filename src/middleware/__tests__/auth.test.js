@@ -41,7 +41,6 @@ describe('Middleware / auth', () => {
     it('should work with mutation', async () => {
       const req1 = mockReq();
       await rnl.sendMutation(req1);
-
       expect(req1.payload).toEqual({ response: 'PAYLOAD' });
       const reqs = fetchMock.calls('/graphql');
       expect(reqs).toHaveLength(1);

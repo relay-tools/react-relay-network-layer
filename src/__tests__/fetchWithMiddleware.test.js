@@ -35,7 +35,7 @@ describe('fetchWithMiddleware', () => {
   it('should make a successfull request without middlewares', async () => {
     fetchMock.post('/graphql', { id: 1, data: { user: 123 } });
 
-    const data = await fetchWithMiddleware(createMockReq(1), []);
+    const { data } = await fetchWithMiddleware(createMockReq(1), [], {});
     expect(data).toEqual({ user: 123 });
   });
 
@@ -53,10 +53,14 @@ describe('fetchWithMiddleware', () => {
 
     fetchMock.post('/graphql', { id: 1, data: { num: 1 } });
 
-    const data = await fetchWithMiddleware(createMockReq(1), [
-      numPlus5,
-      numMultiply10, // should be first, when changing response
-    ]);
+    const { data } = await fetchWithMiddleware(
+      createMockReq(1),
+      [
+        numPlus5,
+        numMultiply10, // should be first, when changing response
+      ],
+      {}
+    );
     expect(data).toEqual({ num: 15 });
   });
 });

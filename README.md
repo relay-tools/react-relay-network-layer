@@ -88,6 +88,21 @@ Middlewares
   - `prefix` - prefix message (default: `[RELAY-NETWORK] GRAPHQL SERVER ERROR:`)
 - **deferMiddleware** - _experimental_ Right now `deferMiddleware()` just set `defer` as supported option for Relay. So this middleware allow to community play with `defer()` in cases, which was [described by @wincent](https://github.com/facebook/relay/issues/288#issuecomment-199510058).
 
+Advanced options (2nd argument after middlewares)
+===========
+
+RelayNetworkLayer may accept additional options:
+
+```js
+const middlewares = []; // array of middlewares
+const options = {}; // optional advanced options
+const network = new RelayNetworkLayer(middlewares, options);
+```
+
+Available options:
+
+- **noThrow** - EXPERIMENTAL (May be deprecated in the future) set true to not throw when an error response is given by the server, and to instead handle errors in your app code.
+
 ### Example of injecting NetworkLayer with middlewares on the **client side**.
 ```js
 import Relay from 'react-relay';

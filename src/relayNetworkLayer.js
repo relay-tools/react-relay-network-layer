@@ -3,9 +3,7 @@
 import queries from './relayQueries';
 import mutation from './relayMutation';
 import fetchWithMiddleware from './fetchWithMiddleware';
-import type { Middleware, RelayClassicRequest } from './definition';
-
-export type RRNLOptions = {};
+import type { Middleware, RelayClassicRequest, RRNLOptions } from './definition';
 
 export default class RelayNetworkLayer {
   _options: RRNLOptions;
@@ -16,7 +14,7 @@ export default class RelayNetworkLayer {
   sendMutation: Function;
 
   constructor(middlewares: Middleware[] | Middleware, options?: RRNLOptions) {
-    this._options = options || {};
+    this._options = typeof options === 'object' ? options : {};
     this._middlewares = Array.isArray(middlewares) ? middlewares : [middlewares];
     this._supportedOptions = [];
 
@@ -40,10 +38,10 @@ export default class RelayNetworkLayer {
   }
 
   sendQueries(requests: RelayClassicRequest[]): Promise<any> {
-    return queries(requests, req => fetchWithMiddleware(req, this._middlewares));
+    return queries(requests, req => fetchWithMiddleware(req, this._middlewares, this._options));
   }
 
   sendMutation(request: RelayClassicRequest): Promise<any> {
-    return mutation(request, req => fetchWithMiddleware(req, this._middlewares));
+    return mutation(request, req => fetchWithMiddleware(req, this._middlewares, this._options));
   }
 }

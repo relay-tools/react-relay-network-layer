@@ -7,6 +7,7 @@ import type {
   RRNLRequestObject,
   RRNLResponseObject,
   MiddlewareNextFn,
+  RRNLOptions,
 } from './definition';
 
 function runFetch(req: RRNLRequestObject): Promise<RRNLResponseObject> {
@@ -40,16 +41,27 @@ function runFetch(req: RRNLRequestObject): Promise<RRNLResponseObject> {
 
 export default function fetchWithMiddleware(
   req: RRNLRequestObject,
-  middlewares: Middleware[]
+  middlewares: Middleware[],
+  options: RRNLOptions
 ): Promise<any> {
   const wrappedFetch: MiddlewareNextFn = compose(...middlewares)(runFetch);
 
   return wrappedFetch(req).then(res => {
     const { payload } = res;
-    if (!payload || payload.hasOwnProperty('errors') || !payload.hasOwnProperty('data')) {
+    const { noThrow = false } = options;
+    const hasErrors =
+      !payload || payload.hasOwnProperty('errors') || !payload.hasOwnProperty('data');
+
+    /** Only throw the Error if noThrow === false */
+    if (!noThrow && hasErrors) {
       throw createRequestError(req, res);
     }
-    return payload.data;
+
+    /** Return payload.data as well as the errors (if they exist) */
+    return {
+      data: (payload && payload.data) || null,
+      errors: hasErrors ? createRequestError(req, res) : null,
+    };
   });
 }
 
