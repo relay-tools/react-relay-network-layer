@@ -14,6 +14,7 @@ export type FetchOpts = {
   method: 'POST' | 'GET',
   headers: { [name: string]: string },
   body: string | FormData,
+  credentials: | 'omit' | 'same-origin' | 'include',
 };
 
 export type RRNLRequestObject =
