@@ -31,10 +31,7 @@ export default function queries(
 
       return fetchWithMiddleware(req)
         .then(({ data }) => relayRequest.resolve({ response: data }))
-        .catch(err => {
-          relayRequest.reject(err);
-          throw err;
-        });
+        .catch(err => relayRequest.reject(err));
     })
   );
 }

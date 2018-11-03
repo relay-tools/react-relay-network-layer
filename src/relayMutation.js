@@ -27,10 +27,7 @@ export default function mutation(
 
   return fetchWithMiddleware(req)
     .then(({ data }) => relayRequest.resolve({ response: data }))
-    .catch(err => {
-      relayRequest.reject(err);
-      throw err;
-    });
+    .catch(err => relayRequest.reject(err));
 }
 
 function hasFiles(relayRequest: RelayClassicRequest): boolean {
